@@ -59,7 +59,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private void sendMenu(long chatId){
         logger.info("Method sendMessage has been run: {}, {}", chatId, TelegramBotUpdatesListener.GREETINGS_MESSAGE);
 
-        InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
+        SendMessage request = new SendMessage(chatId, TelegramBotUpdatesListener.GREETINGS_MESSAGE)
+                .replyMarkup(createKeyboard())
+                .parseMode(ParseMode.HTML)
+                .disableWebPagePreview(true);
+
+        SendResponse sendResponse = telegramBot.execute(request);
+        if (!sendResponse.isOk()){
+            int codeError = sendResponse.errorCode();
+            String description = sendResponse.description();
+            logger.info("code of error: {}", codeError);
+            logger.info("description -: {}", description);
+        }
+    }
+
+    private InlineKeyboardMarkup createKeyboard(){
+        return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[][]{
                         new InlineKeyboardButton[]{
                                 new InlineKeyboardButton("Узнать информацию о приюте").callbackData("1")
@@ -74,18 +89,5 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                 new InlineKeyboardButton("Позвать волонтера").callbackData("4")
                         }
                 });
-
-        SendMessage request = new SendMessage(chatId, TelegramBotUpdatesListener.GREETINGS_MESSAGE)
-                .replyMarkup(inlineKeyboard)
-                .parseMode(ParseMode.HTML)
-                .disableWebPagePreview(true);
-
-        SendResponse sendResponse = telegramBot.execute(request);
-        if (!sendResponse.isOk()){
-            int codeError = sendResponse.errorCode();
-            String description = sendResponse.description();
-            logger.info("code of error: {}", codeError);
-            logger.info("description -: {}", description);
-        }
     }
 }
