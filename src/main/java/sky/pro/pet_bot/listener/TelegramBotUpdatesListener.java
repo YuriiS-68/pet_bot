@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
 
+/**
+ * класс по обработке сообщений, напоминаний об отчетах
+ * и предоставлению информации пользователю бота*/
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
