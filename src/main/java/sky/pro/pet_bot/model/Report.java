@@ -1,5 +1,7 @@
 package sky.pro.pet_bot.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -9,12 +11,17 @@ public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String reportText;
     private Long chatId;
 
-    public Report(Integer id, String reportText, Long chatId) {
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonBackReference
+    private User user;
+
+    public Report(Long id, String reportText, Long chatId) {
         this.id = id;
         this.reportText = reportText;
         this.chatId = chatId;
@@ -23,11 +30,11 @@ public class Report {
     public Report() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

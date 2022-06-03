@@ -1,6 +1,9 @@
 package sky.pro.pet_bot.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -9,12 +12,16 @@ public class Volunteer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String name;
     private String phoneNumber;
 
-    public Volunteer(Integer id, String name, String phoneNumber) {
+    @OneToMany(mappedBy = "volunteer")
+    @JsonManagedReference
+    private Collection<User> users;
+
+    public Volunteer(Long id, String name, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -23,11 +30,11 @@ public class Volunteer {
     public Volunteer() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
