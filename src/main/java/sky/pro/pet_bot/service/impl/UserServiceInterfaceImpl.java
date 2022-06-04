@@ -9,6 +9,7 @@ import sky.pro.pet_bot.model.User;
 import sky.pro.pet_bot.service.UserServiceInterface;
 
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
 public class UserServiceInterfaceImpl implements UserServiceInterface {
@@ -31,8 +32,10 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
         User user = new User();
         user.setChatId(message.chat().id());
         user.setName(message.from().username());
-        user.setLocation(message.location().toString());
-        //userRepository.save(user);
+        if (message.location() != null) {
+            user.setLocation(message.location().toString());
+        }
+        userRepository.save(user);
         return user;
     }
 

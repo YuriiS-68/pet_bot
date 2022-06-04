@@ -28,6 +28,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private static final String START_CMD = "/start";
     private static final String GREETINGS_MESSAGE = "Welcome to Pet Finder!\nChoose one of the items on this menu:";
     private static final String CHOOSE_SHELTER = "Make your choice from the menu below:";
+
+    private static final String ABOUT_SHELTER_DOG = "Наш приют бла бла бла... для собак";
+    private static final String ABOUT_SHELTER_CAT = "Наш приют бла бла бла... для кошек";
+
+
+    private static final String OPENING_HOURS_DOG = "Адрес приюта\nНи дом и ни улица\nРаботаем круглосуточно";
+    private static final String OPENING_HOURS_CAT = "Адрес приюта\nНи дом и ни улица\nРаботаем c 07:00 до 21:00";
+
     private final TelegramBot telegramBot;
     private final UserServiceInterfaceImpl userServiceInterface;
     private final CreateKeyboardMenuImpl createKeyboardMenu;
@@ -55,12 +63,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 Long chatId = message.chat().id();
 
                 if (!userServiceInterface.existChatId(chatId)){
-                    sendStartMenu(chatId, GREETINGS_MESSAGE);
-                    //userServiceInterface.saveUser(message);
+                    sendMenu(chatId, GREETINGS_MESSAGE, createKeyboardMenu.startKeyboard());
+                    try{
+                        userServiceInterface.saveUser(message);
+                    }catch (IllegalFormatException | DateTimeParseException e){
+                        logger.error("Saving to DB failed:", e);
+                    }
+                } else {
+                    sendMenu(chatId, CHOOSE_SHELTER, createKeyboardMenu.startKeyboard());
                 }
-
-                sendStartMenu(chatId, CHOOSE_SHELTER);
-
 
             } else {
                 GetUpdatesResponse updatesResponse = telegramBot.execute(new GetUpdates());
@@ -68,44 +79,56 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 callbackUpdates.forEach(callbackUpdate -> {
                     CallbackQuery callbackQuery = callbackUpdate.callbackQuery();
                     Long callbackChatId = callbackQuery.message().chat().id();
-                    String callbackUserName = callbackQuery.message().from().username();
-                    sendChooseMenu(callbackChatId, callbackQuery.data());
+
+                    if (callbackQuery.data().equals("DOG SHELTER") || callbackQuery.data().equals("CAT SHELTER")){
+                        sendMenu(callbackChatId, callbackQuery.data(),
+                                createKeyboardMenu.createChooseMenu(callbackQuery.data()));
+                    }
+
+                    if (callbackQuery.data().equals("INFO ABOUT DOG SHELTER") || callbackQuery.data().equals("INFO ABOUT CAT SHELTER")){
+                        sendMenu(callbackChatId, callbackQuery.data(),
+                                createKeyboardMenu.menuShelterKeyboard(callbackQuery.data()));
+                    }
+
+                    if (callbackQuery.data().equals("ABOUT OUR DOG SHELTER")){
+                        logger.info("Pushed button: {}", callbackQuery.data());
+                        sendMessage(callbackChatId, ABOUT_SHELTER_DOG);
+                    }
+                    if (callbackQuery.data().equals("ABOUT OUR CAT SHELTER")){
+                        logger.info("Pushed button: {}", callbackQuery.data());
+                        sendMessage(callbackChatId, ABOUT_SHELTER_CAT);
+                    }
+
+                    if (callbackQuery.data().equals("SHELTER DOG OPENING HOURS")){
+                        logger.info("Pushed button: {}", callbackQuery.data());
+                        sendMessage(callbackChatId, OPENING_HOURS_DOG);
+                    }
+                    if (callbackQuery.data().equals("SHELTER CAT OPENING HOURS")){
+                        logger.info("Pushed button: {}", callbackQuery.data());
+                        sendMessage(callbackChatId, OPENING_HOURS_CAT);
+                    }
+
                 });
-
-                /*GetUpdatesResponse updatesChooseMenuResponse = telegramBot.execute(new GetUpdates());
-                List<Update> callbackChooseMenuUpdates = updatesChooseMenuResponse.updates();
-                callbackChooseMenuUpdates.forEach(callbackChooseMenuUpdate -> {
-                    CallbackQuery callbackQuery = callbackChooseMenuUpdate.callbackQuery();
-                    Long callbackChatId = callbackQuery.message().chat().id();
-                });*/
-
-                try{
-                    //save user
-                }catch (IllegalFormatException | DateTimeParseException e){
-
-                    logger.error("Saving to DB failed:", e);
-                }
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
-    private void sendStartMenu(long chatId, String text){
-        logger.info("Method sendMessage has been run: {}, {}", chatId, text);
+    private void sendMenu(Long chatId, String text, InlineKeyboardMarkup keyboard){
+        logger.info("Method sendMessage has been run: {}, {}, {}", chatId, text, keyboard);
 
         SendMessage request = new SendMessage(chatId, text)
-                .replyMarkup(createKeyboardMenu.startKeyboard())
+                .replyMarkup(keyboard)
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true);
 
         sendResponse(request);
     }
 
-    private void sendChooseMenu(long chatId, String kindPet){
-        logger.info("Method sendMessage has been run: {}, {}", chatId, kindPet);
+    private void sendMessage(Long chatId, String text){
+        logger.info("Method sendMessage has been run: {}, {}", chatId, text);
 
-        SendMessage request = new SendMessage(chatId, kindPet)
-                .replyMarkup(createKeyboardMenu.createChooseMenu(kindPet))
+        SendMessage request = new SendMessage(chatId, text)
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true);
 
