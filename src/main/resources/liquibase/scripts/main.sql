@@ -12,7 +12,10 @@ CREATE TABLE users (
     id SERIAL NOT NULL PRIMARY KEY,
     chat_id INTEGER NOT NULL,
     name TEXT NOT NULL,
+    first_name VARCHAR(200),
+    last_name VARCHAR(200),
     phone_number VARCHAR(30),
+    email VARCHAR(200),
     location TEXT
 );
 
@@ -42,3 +45,14 @@ CREATE TABLE volunteers (
     name TEXT NOT NULL,
     phone_number VARCHAR(30)
 );
+
+-- changeSet yuvis:6
+ALTER TABLE users ADD COLUMN type_shelter VARCHAR(50) DEFAULT NULL
+                    CONSTRAINT type_shelter_check CHECK ( type_shelter IN ('DOG_SHELTER', 'CAT_SHELTER'));
+
+-- changeSet yuvis:7
+ALTER TABLE users ADD COLUMN message_id INTEGER;
+
+-- changeSet yuvis:8
+ALTER TABLE volunteers ADD COLUMN status VARCHAR(50) DEFAULT 'FREE'
+                    CONSTRAINT status_check CHECK ( status IN ('FREE', 'BUSY'));

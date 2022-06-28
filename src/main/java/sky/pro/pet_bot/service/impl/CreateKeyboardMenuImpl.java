@@ -2,44 +2,40 @@ package sky.pro.pet_bot.service.impl;
 
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Service;
-import sky.pro.pet_bot.exception.NotExistSuchPetException;
 import sky.pro.pet_bot.service.CreateKeyboardMenuInterface;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 @Service
 public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
-    private static final String BUTTON_SHELTER_CAT = "Приют для кошек";
-    private static final String BUTTON_SHELTER_DOG = "Приют для собак";
+    private final Properties messagesProperties;
+    private final Logger logger = LoggerFactory.getLogger(CreateKeyboardMenuImpl.class);
 
-    private static final String BUTTON_MENU_INFO_DOG = "Узнать информацию о приюте для собак";
-    private static final String BUTTON_MENU_INFO_CAT = "Узнать информацию о приюте для кошек";
-
-    private static final String BUTTON_ABOUT_CAT_SHELTER = "Информация о приюте для кошек";
-    private static final String BUTTON_ABOUT_DOG_SHELTER = "Информация о приюте для собак";
-
-    private static final String BUTTON_SHEDULLE_DOG_SHELTER = "Часы работы приюта для собак и адрес";
-    private static final String BUTTON_SHEDULLE_CAT_SHELTER = "Часы работы приюта для кошек и адрес";
-
-    private static final String SECURITY_SHELTER = "Охрана";
-    private static final String SAFETY_ADVICE_SHELTER = "Рекомендации по ТБ";
-    private static final String ACCEPT_DATA = "Ваши контактные данные";
-
-    private static final String BUTTON_CAT = "Как взять кошку из приюта";
-    private static final String BUTTON_DOG = "Как взять собаку из приюта";
-    private static final String BUTTON_MENU_REPORT_DOG = "Прислать отчет о собаке";
-    private static final String BUTTON_MENU_REPORT_CAT = "Прислать отчет о кошке";
-    private static final String CALL_VOLUNTEER = "Обратиться к волонтеру";
-
+    public CreateKeyboardMenuImpl() throws IOException {
+        this.messagesProperties = PropertiesLoaderUtils
+                .loadProperties(new EncodedResource(new ClassPathResource("/messages.properties"),
+                StandardCharsets.UTF_8));
+    }
 
     @Override
     public InlineKeyboardMarkup startKeyboard() {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[][]{
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(BUTTON_SHELTER_CAT).callbackData("CAT SHELTER")
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_shelter_cat"))
+                                        .callbackData("CAT SHELTER")
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(BUTTON_SHELTER_DOG).callbackData("DOG SHELTER")
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_shelter_dog"))
+                                        .callbackData("DOG SHELTER")
                         }
                 });
     }
@@ -54,31 +50,62 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                                 getButtonShedulleByKindPet(kindShelter)
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(SECURITY_SHELTER).callbackData("SECURITY OF SHELTER")
+                                getButtonSecurityByKindPet(kindShelter)
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(SAFETY_ADVICE_SHELTER).callbackData("SAFETY ADVICE OF SHELTER")
+                                getButtonSafetyAdviceByKindPet(kindShelter)
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(ACCEPT_DATA).callbackData("LEAVE YOUR CONTACT DETAILS")
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_accept_data"))
+                                        .callbackData("LEAVE YOUR CONTACT DETAILS")
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(CALL_VOLUNTEER).callbackData("CALL VOLUNTEER")
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer"))
+                                        .callbackData("CALL VOLUNTEER")
                         }
                 });
     }
-    private InlineKeyboardButton getButtonShelterByKindPet(String kindShelter){
+
+    private InlineKeyboardButton getButtonSafetyAdviceByKindPet(String kindShelter){
+        logger.info("Run method getButtonShelterByKindPet: {}", kindShelter);
+
         if (kindShelter.equals("INFO ABOUT DOG SHELTER")){
-            return new InlineKeyboardButton(BUTTON_ABOUT_DOG_SHELTER).callbackData("ABOUT OUR DOG SHELTER");
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_safety_advice_dog_shelter"))
+                    .callbackData("SAFETY ADVICE OF DOG SHELTER");
         }
-        return new InlineKeyboardButton(BUTTON_ABOUT_CAT_SHELTER).callbackData("ABOUT OUR CAT SHELTER");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_safety_advice_cat_shelter"))
+                .callbackData("SAFETY ADVICE OF CAT SHELTER");
+    }
+    private InlineKeyboardButton getButtonSecurityByKindPet(String kindShelter){
+        logger.info("Run method getButtonShelterByKindPet: {}", kindShelter);
+
+        if (kindShelter.equals("INFO ABOUT DOG SHELTER")){
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_security_dog_shelter"))
+                    .callbackData("SECURITY OF DOG SHELTER");
+        }
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_security_cat_shelter"))
+                .callbackData("SECURITY OF CAT SHELTER");
+    }
+    private InlineKeyboardButton getButtonShelterByKindPet(String kindShelter){
+        logger.info("Run method getButtonShelterByKindPet: {}", kindShelter);
+
+        if (kindShelter.equals("INFO ABOUT DOG SHELTER")){
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_about_dog_shelter"))
+                    .callbackData("ABOUT OUR DOG SHELTER");
+        }
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_about_cat_shelter"))
+                .callbackData("ABOUT OUR CAT SHELTER");
     }
 
     private InlineKeyboardButton getButtonShedulleByKindPet(String kindShedulleShelter){
-        if (kindShedulleShelter.equals("SHELTER DOG OPENING HOURS")){
-            return new InlineKeyboardButton(BUTTON_SHEDULLE_DOG_SHELTER).callbackData("SHELTER DOG OPENING HOURS");
+        logger.info("Run method getButtonShedulleByKindPet: {}", kindShedulleShelter);
+
+        if (kindShedulleShelter.equals("INFO ABOUT DOG SHELTER")){
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_shedulle_dog_shelter"))
+                    .callbackData("SHELTER DOG OPENING HOURS");
         }
-        return new InlineKeyboardButton(BUTTON_SHEDULLE_CAT_SHELTER).callbackData("SHELTER CAT OPENING HOURS");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_shedulle_cat_shelter"))
+                .callbackData("SHELTER CAT OPENING HOURS");
     }
 
     @Override
@@ -95,29 +122,33 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                                 getButtonMenuReportByKindPet(kindPet)
                         },
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(CALL_VOLUNTEER).callbackData("4")
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer")).callbackData("CALL VOLUNTEER")
                         }
                 });
     }
 
     private InlineKeyboardButton getButtonByKindPet(String kindPet){
         if (kindPet.equals("DOG SHELTER")){
-            return new InlineKeyboardButton(BUTTON_DOG).callbackData("DOG");
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_take_dog")).callbackData("DOG");
         }
-        return new InlineKeyboardButton(BUTTON_CAT).callbackData("CAT");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_take_cat")).callbackData("CAT");
     }
 
     private InlineKeyboardButton getButtonMenuInfoByKindPet(String kindPet){
         if (kindPet.equals("DOG SHELTER")){
-            return new InlineKeyboardButton(BUTTON_MENU_INFO_DOG).callbackData("INFO ABOUT DOG SHELTER");
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_menu_info_dog"))
+                    .callbackData("INFO ABOUT DOG SHELTER");
         }
-        return new InlineKeyboardButton(BUTTON_MENU_INFO_CAT).callbackData("INFO ABOUT CAT SHELTER");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_menu_info_cat"))
+                .callbackData("INFO ABOUT CAT SHELTER");
     }
 
     private InlineKeyboardButton getButtonMenuReportByKindPet(String kindPet){
         if (kindPet.equals("DOG SHELTER")){
-            return new InlineKeyboardButton(BUTTON_MENU_REPORT_DOG).callbackData("DOG REPORTS");
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_menu_report_dog"))
+                    .callbackData("DOG REPORTS");
         }
-        return new InlineKeyboardButton(BUTTON_MENU_REPORT_CAT).callbackData("CAT REPORTS");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_menu_report_cat"))
+                .callbackData("CAT REPORTS");
     }
 }

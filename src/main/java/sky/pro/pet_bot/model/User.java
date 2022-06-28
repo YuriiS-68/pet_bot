@@ -12,13 +12,25 @@ import java.util.StringJoiner;
 @Table (name= "users")
 public class User {
 
+    public enum TypeShelters{
+        DOG_SHELTER,
+        CAT_SHELTER;
+
+    }
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
     private Long chatId;
+    private Integer messageId;
     private String phoneNumber;
     private String name;
+    private String firstName;
+    private String lastName;
+    private String email;
     private String location;
+
+    @Enumerated(EnumType.STRING)
+    private User.TypeShelters typeShelter;
 
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
@@ -37,12 +49,26 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String phoneNumber, String name, Long chatId, String location) {
+    public User(Long id, Long chatId, Integer messageId, String phoneNumber, String name, String firstName, String lastName,
+                String email, String location, TypeShelters typeShelter) {
         this.id = id;
+        this.chatId = chatId;
+        this.messageId = messageId;
         this.phoneNumber = phoneNumber;
         this.name = name;
-        this.chatId = chatId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
         this.location = location;
+        this.typeShelter = typeShelter;
+    }
+
+    public TypeShelters getTypeShelter() {
+        return typeShelter;
+    }
+
+    public void setTypeShelter(TypeShelters typeShelter) {
+        this.typeShelter = typeShelter;
     }
 
     public Long getId() {
@@ -61,6 +87,14 @@ public class User {
         this.chatId = chatId;
     }
 
+    public Integer getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Integer messageId) {
+        this.messageId = messageId;
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -75,6 +109,30 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getLocation() {
@@ -114,12 +172,19 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return getId().equals(user.getId()) && getChatId().equals(user.getChatId()) && Objects.equals(getPhoneNumber(), user.getPhoneNumber()) && getName().equals(user.getName()) && Objects.equals(getLocation(), user.getLocation());
+        return getId().equals(user.getId()) && getChatId().equals(user.getChatId()) && getMessageId().equals(user.getMessageId())
+                && Objects.equals(getPhoneNumber(), user.getPhoneNumber()) && getName().equals(user.getName())
+                && Objects.equals(getFirstName(), user.getFirstName()) && Objects.equals(getLastName(), user.getLastName())
+                && Objects.equals(getEmail(), user.getEmail()) && Objects.equals(getLocation(), user.getLocation())
+                && Objects.equals(getTypeShelter(), user.getTypeShelter())
+                && Objects.equals(getPets(), user.getPets()) && Objects.equals(getReports(), user.getReports())
+                && Objects.equals(getVolunteer(), user.getVolunteer());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getChatId(), getPhoneNumber(), getName(), getLocation());
+        return Objects.hash(getId(), getChatId(), getMessageId(), getPhoneNumber(), getName(), getFirstName(), getLastName(),
+                getEmail(), getLocation(), getTypeShelter(), getPets(), getReports(), getVolunteer());
     }
 
     @Override
@@ -127,12 +192,17 @@ public class User {
         return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("chatId=" + chatId)
+                .add("messageId=" + messageId)
                 .add("phoneNumber='" + phoneNumber + "'")
                 .add("name='" + name + "'")
+                .add("firstName='" + firstName + "'")
+                .add("lastName='" + lastName + "'")
+                .add("email='" + email + "'")
                 .add("location='" + location + "'")
+                .add("typeShelter='" + typeShelter + "'")
                 .add("pets=" + pets)
                 .add("reports=" + reports)
-                .add("volunteer=" + volunteer)
+                .add("volunteer=" + volunteer.getName())
                 .toString();
     }
 }
