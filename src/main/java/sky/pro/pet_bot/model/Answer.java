@@ -3,25 +3,29 @@ package sky.pro.pet_bot.model;
 import javax.persistence.*;
 import java.util.Objects;
 
-/**
- * Класс, описывающий общие ответы,
- * хранящиеся в БД для вывода пользователю
- */
 @Entity
-@Table(name = "answers")
+@Table (name = "answers")
 public class Answer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String textMessage;
 
     public Answer(Long id, String textMessage) {
         this.id = id;
         this.textMessage = textMessage;
     }
 
-    private String textMessage;
-
     public Answer() {
+    }
+
+    public boolean isById(Long id) {
+        if (this.id != id) {
+            return false;
+        }
+        return true;
     }
 
     public Long getId() {
@@ -30,6 +34,14 @@ public class Answer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getTextMessage() {
+        return textMessage;
+    }
+
+    public void setTextMessage(String textMessage) {
+        this.textMessage = textMessage;
     }
 
     @Override
@@ -43,5 +55,13 @@ public class Answer {
     @Override
     public int hashCode() {
         return Objects.hash(id, textMessage);
+    }
+
+    @Override
+    public String toString() {
+        return "Answer{" +
+                "id=" + id +
+                ", textMessage='" + textMessage + '\'' +
+                '}';
     }
 }

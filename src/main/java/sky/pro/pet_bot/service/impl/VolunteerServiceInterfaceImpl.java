@@ -22,14 +22,14 @@ public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface 
     }
 
     @Override
-    public Volunteer addUserPet(Volunteer volunteer) {
-        logger.info("Volunteer successfully saved");
+    public Volunteer addVolunteer (Volunteer volunteer) {
+        logger.info("Volunteer was successfully saved");
         return volunteerRepository.save(volunteer);
     }
 
     @Override
-    public Collection<Volunteer> getVolunteerById(Integer id) {
-        logger.info("Method getAllVolunteerById is start");
+    public Collection<Volunteer> getVolunteerById(Long id) {
+        logger.info("Method getAllVolunteerById is started");
         return getAllVolunteers().stream()
                 .filter(volunteer -> volunteer.isById(id))
                 .collect(Collectors.toList());
@@ -37,7 +37,18 @@ public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface 
 
     @Override
     public Collection<Volunteer> getAllVolunteers() {
-        logger.info("Method getAllVolunteers is start");
+        logger.info("Method getAllVolunteers is started");
         return volunteerRepository.findAll();
+    }
+
+    @Override
+    public Volunteer update (Volunteer volunteer){
+        logger.info("Method getAllVolunteers is started");
+      return volunteerRepository.save(volunteer);
+    }
+
+    @Override
+    public void delete(Long id) {
+        volunteerRepository.deleteById(id);
     }
 }

@@ -11,12 +11,12 @@ public class Volunteer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String name;
     private String phoneNumber;
 
-    public Volunteer(Integer id, String name, String phoneNumber) {
+    public Volunteer(Long id, String name, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -25,18 +25,18 @@ public class Volunteer {
     public Volunteer() {
     }
 
-    public boolean isById(Integer id) {
+    public boolean isById(Long id) {
         if (this.id != id) {
             return false;
         }
         return true;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -67,5 +67,14 @@ public class Volunteer {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, phoneNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "Volunteer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                '}';
     }
 }

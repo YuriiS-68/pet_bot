@@ -3,45 +3,48 @@ package sky.pro.pet_bot.model;
 import javax.persistence.*;
 import java.util.Objects;
 
-/**
- * Класс, описывающий животных
- * приюта для вывода пользователю
- */
 @Entity
 @Table (name = "pets")
 public class Pet {
 
+    public enum PetType{
+        DOG,
+        CAT,
+    }
+
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String name;
-    private String type;
     private Integer age;
 
-    public Pet(Integer id, String name, String type, Integer age) {
+    @Enumerated (EnumType.STRING)
+    private PetType type = PetType.DOG;
+
+    public Pet(Long id, String name, Integer age, PetType type) {
         this.id = id;
         this.name = name;
-        this.type = type;
         this.age = age;
+        this.type = type;
     }
 
     public Pet() {
 
     }
 
-    public boolean isById(Integer id) {
+    public boolean isById(Long id) {
         if (this.id != id) {
             return false;
         }
         return true;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -53,14 +56,6 @@ public class Pet {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public Integer getAge() {
         return age;
     }
@@ -69,16 +64,34 @@ public class Pet {
         this.age = age;
     }
 
+    public PetType getType() {
+        return type;
+    }
+
+    public void setType(PetType type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pet pet = (Pet) o;
-        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(type, pet.type) && Objects.equals(age, pet.age);
+        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(age, pet.age) && type == pet.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, type, age);
+        return Objects.hash(id, name, age, type);
+    }
+
+    @Override
+    public String toString() {
+        return "Pet{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", type=" + type +
+                '}';
     }
 }

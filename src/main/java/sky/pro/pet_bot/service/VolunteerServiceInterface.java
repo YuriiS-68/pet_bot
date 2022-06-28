@@ -7,9 +7,13 @@ import java.util.Collection;
 
 public interface VolunteerServiceInterface {
 
-    Volunteer addUserPet(Volunteer volunteer);
+    Volunteer addVolunteer(Volunteer volunteer);
 
-    Collection<Volunteer> getVolunteerById(Integer id);
+    Collection<Volunteer> getVolunteerById(Long id);
 
     Collection<Volunteer> getAllVolunteers();
+
+    Volunteer update(Volunteer volunteer);
+
+    void delete(Long id);
 }

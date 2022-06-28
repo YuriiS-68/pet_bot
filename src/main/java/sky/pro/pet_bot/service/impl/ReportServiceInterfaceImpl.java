@@ -1,9 +1,8 @@
 package sky.pro.pet_bot.service.impl;
 
+import org.springframework.stereotype.Service;
 import sky.pro.pet_bot.service.ReportServiceInterface;
 
-/**
- * Реализация интерфейса для работы с отчетами владельца животного
- */
+@Service
 public class ReportServiceInterfaceImpl implements ReportServiceInterface {
 }

@@ -1,6 +1,7 @@
 package sky.pro.pet_bot.model;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 /**Класс, описывающий пользователя, взаимодействующего с ботом
@@ -19,6 +20,8 @@ public class User {
     private String name;
     private Long chatId;
     private String location;
+
+
 
 
     public User() {
@@ -90,5 +93,16 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, phoneNumber, name, chatId, location);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", phoneNumber=" + phoneNumber +
+                ", name='" + name + '\'' +
+                ", chatId=" + chatId +
+                ", location='" + location + '\'' +
+                '}';
     }
 }

@@ -10,6 +10,7 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import sky.pro.pet_bot.model.Pet;
 
 import javax.annotation.PostConstruct;
 import java.time.format.DateTimeParseException;
@@ -91,4 +92,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             logger.info("description -: {}", description);
         }
     }
+
+
 }

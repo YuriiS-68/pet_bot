@@ -8,7 +8,7 @@ public interface PetServiceInterface {
 
     Pet addUserPet(Pet pet);
 
-    Collection<Pet> getPetById(Integer id);
+    Pet getPetById(Long id);
 
     Collection<Pet> getAllPets();
 

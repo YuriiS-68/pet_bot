@@ -3,11 +3,6 @@ package sky.pro.pet_bot.model;
 import javax.persistence.*;
 import java.util.Objects;
 
-/**
- * Класс, описывающий отчёты, присылаемые владельцем животного
- */
-
-
 @Entity
 @Table(name = "reports")
 public class Report {
@@ -63,5 +58,14 @@ public class Report {
     @Override
     public int hashCode() {
         return Objects.hash(id, reportText, chatId);
+    }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                "id=" + id +
+                ", reportText='" + reportText + '\'' +
+                ", chatId=" + chatId +
+                '}';
     }
 }

@@ -29,16 +29,24 @@ public class PetServiceInterfaceImpl implements PetServiceInterface {
     }
 
     @Override
-    public Collection<Pet> getPetById(Integer id) {
-        logger.info("Method getPetById is start");
-        return getAllPets().stream()
-                .filter(pet -> pet.isById(id))
-                .collect(Collectors.toList());
+    public Pet getPetById(Long id) {
+        logger.info("Method getPetById is started");
+        return petRepository.findById(id).get();
     }
 
     @Override
     public Collection<Pet> getAllPets() {
         logger.info("Method getAllPets is start");
         return petRepository.findAll();
+    }
+
+    public Pet updatePet(Pet pet) {
+        logger.info("Pet was successfully updated");
+        return petRepository.save(pet);
+    }
+
+    public void deletePetById(long id) {
+        logger.info("Pet was successfully updated");
+        petRepository.deleteById(id);
     }
 }
