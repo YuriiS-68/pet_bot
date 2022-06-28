@@ -66,4 +66,13 @@ public class Report {
     public int hashCode() {
         return Objects.hash(id, reportText, chatId);
     }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                "id=" + id +
+                ", reportText='" + reportText + '\'' +
+                ", chatId=" + chatId +
+                '}';
+    }
 }

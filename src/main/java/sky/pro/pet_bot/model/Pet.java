@@ -96,7 +96,7 @@ public class Pet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pet pet = (Pet) o;
-        return getId().equals(pet.getId()) && getName().equals(pet.getName()) && getAge().equals(pet.getAge()) && getType() == pet.getType();
+        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(type, pet.type) && Objects.equals(age, pet.age);
     }
 
     @Override

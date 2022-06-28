@@ -8,6 +8,10 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**Класс, описывающий пользователя, взаимодействующего с ботом
+ *
+ */
+
 @Entity
 @Table (name= "users")
 public class User {

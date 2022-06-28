@@ -109,6 +109,7 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
 
     @Override
     public Collection<User> getAllUsers() {
-        return null;
+        logger.info("Method getAllUsers is start");
+        return userRepository.findAll();
     }
 }
