@@ -1,43 +1,62 @@
 package sky.pro.pet_bot.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Entity
 @Table (name = "pets")
 public class Pet {
-
-    public enum PetType{
+    public enum KindPet{
         DOG,
-        CAT,
+        CAT
     }
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private Integer age;
+    @Enumerated(EnumType.STRING)
+    private KindPet type;
 
-    @Enumerated (EnumType.STRING)
-    private PetType type = PetType.DOG;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonBackReference
+    private User user;
 
-    public Pet(Long id, String name, Integer age, PetType type) {
+    @ManyToOne
+    @JoinColumn(name = "shelter_id")
+    @JsonBackReference
+    private Shelter shelter;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
+    }
+
+    public Pet(Long id, String name, KindPet type, Integer age) {
         this.id = id;
         this.name = name;
-        this.age = age;
         this.type = type;
+        this.age = age;
     }
 
     public Pet() {
 
-    }
-
-    public boolean isById(Long id) {
-        if (this.id != id) {
-            return false;
-        }
-        return true;
     }
 
     public Long getId() {
@@ -56,6 +75,14 @@ public class Pet {
         this.name = name;
     }
 
+    public KindPet getType() {
+        return type;
+    }
+
+    public void setType(KindPet type) {
+        this.type = type;
+    }
+
     public Integer getAge() {
         return age;
     }
@@ -64,34 +91,26 @@ public class Pet {
         this.age = age;
     }
 
-    public PetType getType() {
-        return type;
-    }
-
-    public void setType(PetType type) {
-        this.type = type;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pet pet = (Pet) o;
-        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(age, pet.age) && type == pet.type;
+        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(type, pet.type) && Objects.equals(age, pet.age);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, age, type);
+        return Objects.hash(getId(), getName(), getAge(), getType());
     }
 
     @Override
     public String toString() {
-        return "Pet{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", age=" + age +
-                ", type=" + type +
-                '}';
+        return new StringJoiner(", ", Pet.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("age=" + age)
+                .add("type=" + type)
+                .toString();
     }
 }

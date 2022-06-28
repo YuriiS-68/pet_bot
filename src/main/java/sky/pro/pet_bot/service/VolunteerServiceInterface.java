@@ -1,19 +1,11 @@
 package sky.pro.pet_bot.service;
 
-
 import sky.pro.pet_bot.model.Volunteer;
 
-import java.util.Collection;
+import java.util.Optional;
 
 public interface VolunteerServiceInterface {
-
-    Volunteer addVolunteer(Volunteer volunteer);
-
-    Collection<Volunteer> getVolunteerById(Long id);
-
-    Collection<Volunteer> getAllVolunteers();
-
-    Volunteer update(Volunteer volunteer);
-
-    void delete(Long id);
+    Volunteer getFreeVolunteerByStatusAndUserId(Long userId, Volunteer.VolunteersStatus status);
+    Volunteer getFreeVolunteerByStatus(String status);
+    void updateVolunteerStatus(Long volunteerId, Volunteer.VolunteersStatus status);
 }

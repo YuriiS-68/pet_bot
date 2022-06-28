@@ -3,52 +3,45 @@ package sky.pro.pet_bot.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sky.pro.pet_bot.dao.VolunteerRepository;
 import sky.pro.pet_bot.model.Volunteer;
 import sky.pro.pet_bot.service.VolunteerServiceInterface;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceInterfaceImpl.class);
-
+    private final Logger logger = LoggerFactory.getLogger(VolunteerServiceInterfaceImpl.class);
     private final VolunteerRepository volunteerRepository;
 
     public VolunteerServiceInterfaceImpl(VolunteerRepository volunteerRepository) {
         this.volunteerRepository = volunteerRepository;
     }
 
-    @Override
-    public Volunteer addVolunteer (Volunteer volunteer) {
-        logger.info("Volunteer was successfully saved");
-        return volunteerRepository.save(volunteer);
+    public Collection<Volunteer> findFreeVolunteers(Long idUser, Volunteer.VolunteersStatus status){
+        logger.info("Run method findFreeVolunteers: {} {}", idUser, status);
+        Collection<Volunteer> volunteers = volunteerRepository.findVolunteersByUserId(idUser, status.toString());
+        logger.info("Collection volunteers: {}", volunteers);
+        return volunteers;
     }
 
     @Override
-    public Collection<Volunteer> getVolunteerById(Long id) {
-        logger.info("Method getAllVolunteerById is started");
-        return getAllVolunteers().stream()
-                .filter(volunteer -> volunteer.isById(id))
-                .collect(Collectors.toList());
+    public Volunteer getFreeVolunteerByStatusAndUserId(Long idUser, Volunteer.VolunteersStatus status) {
+        return volunteerRepository.getVolunteerByStatusAndUserId(idUser, status.toString());
     }
 
     @Override
-    public Collection<Volunteer> getAllVolunteers() {
-        logger.info("Method getAllVolunteers is started");
-        return volunteerRepository.findAll();
+    public Volunteer getFreeVolunteerByStatus(String status) {
+        logger.info("Run method getFreeVolunteerByStatus: {}", status);
+        Volunteer volunteer = volunteerRepository.getVolunteerByStatus(status);
+        logger.info("getFreeVolunteerByStatus: {}", volunteer );
+        return volunteer;
     }
 
+    @Transactional
     @Override
-    public Volunteer update (Volunteer volunteer){
-        logger.info("Method getAllVolunteers is started");
-      return volunteerRepository.save(volunteer);
-    }
-
-    @Override
-    public void delete(Long id) {
-        volunteerRepository.deleteById(id);
+    public void updateVolunteerStatus(Long volunteerId, Volunteer.VolunteersStatus status) {
+        volunteerRepository.updateVolunteerStatus(volunteerId, status);
     }
 }
