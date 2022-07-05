@@ -54,6 +54,18 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
             "SAFETY ADVICE OF CAT SHELTER", "SAFETY_ADVICE_CAT_SHELTER"
     );
 
+    private final Map<String, String> mapGetPetMenu = Map.of(
+            "RULES MEETING", "RULES_MEETING",
+            "LIST DOCUMENT", "LIST_DOCUMENT",
+            "LIST TRANSPORTING", "LIST_TRANSPORTING",
+            "LIST SETTING UP PUPPY", "LIST_SETTING_UP_PUPPY",
+            "LIST SETTING UP KITTY", "LIST_SETTING_UP_KITTY",
+            "LIST SETTING UP PET", "LIST_SETTING_UP_PET",
+            "LIST SETTING UP PET DISABILITY", "LIST_SETTING_UP_PET_DISABILITY",
+            "TIPS DOG BREEDER", "TIPS_DOG_BREEDER",
+            "TRUSTED CYNOLOGISTS", "TRUSTED_CYNOLOGISTS"
+    );
+
     public MessageHandlerServiceInterfaceImpl(TelegramBot telegramBot, UserServiceInterfaceImpl userServiceInterface,
                                               VolunteerServiceInterfaceImpl volunteerServiceInterface,
                                               CreateKeyboardMenuImpl createKeyboardMenu) throws IOException {
@@ -72,7 +84,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
             User currentUser = userServiceInterface.getUserByChatId(chatId);
 
             if (!userServiceInterface.existChatId(chatId)){
-                sendMenu(chatId, messagesProperties.getProperty("GREETINGS_MESSAGE"), createKeyboardMenu.startKeyboard());
+                sendMenu(chatId, messagesProperties.getProperty("GREETINGS_MESSAGE"), createKeyboardMenu.startMenu());
                 try{
                     userServiceInterface.saveUser(message);
                 }catch (IllegalFormatException | DateTimeParseException e){
@@ -80,7 +92,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                 }
             } else {
                 sendMenu(chatId, currentUser.getId(), messagesProperties.getProperty("CHOOSE_SHELTER"),
-                        createKeyboardMenu.startKeyboard());
+                        createKeyboardMenu.startMenu());
             }
         } else {
             GetUpdatesResponse updatesResponse = telegramBot.execute(new GetUpdates());
@@ -98,7 +110,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                         logger.info("Block callbackQuery messageId = {}", currentUserCallback.getMessageId());
 
                         sendMenu(callbackChatId, callbackQuery.data(),
-                                createKeyboardMenu.createChooseMenu(callbackQuery.data()));
+                                createKeyboardMenu.chooseMenu(callbackQuery.data()));
                         deleteMessage(callbackChatId, currentUserCallback.getMessageId());
                     }
 
@@ -106,7 +118,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                             || callbackQuery.data().equals("INFO ABOUT CAT SHELTER")){
                         logger.info("INFO ABOUT callbackQuery.id() = {}", callbackQuery.id());
                         sendMenu(callbackChatId, callbackQuery.data(),
-                                createKeyboardMenu.menuShelterKeyboard(callbackQuery.data()));
+                                createKeyboardMenu.shelterMenu(callbackQuery.data()));
                     }
 
                     if (mapChooseMenu.containsKey(callbackQuery.data())){
@@ -144,6 +156,26 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                             }
                         }
                     }
+
+                    if (callbackQuery.data().equals("HOW TAKE DOG") || callbackQuery.data().equals("HOW TAKE CAT")){
+                        logger.info("Block create menuGetPet was started callbackQuery.data(): {}", callbackQuery.data());
+                        sendMenu(callbackChatId, callbackQuery.data(),
+                                createKeyboardMenu.getPetMenu(callbackQuery.data()));
+                    }
+
+                    if (mapGetPetMenu.containsKey(callbackQuery.data())){
+                        sendMessage(callbackChatId,
+                                messagesProperties.getProperty(mapGetPetMenu.get(callbackQuery.data())));
+                    }
+
+                    if (callbackQuery.data().equals("DOG REPORTS") || callbackQuery.data().equals("CAT REPORTS")){
+                        sendMenu(callbackChatId, callbackQuery.data(), createKeyboardMenu.petManageMenu());
+                    }
+
+                    if (callbackQuery.data().equals("DAILY REPORT FORM")){
+                        sendMessageReply(callbackChatId,
+                                messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
+                    }
                 }
             });
 
@@ -165,7 +197,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
     }
 
     private void sendMenu(Long chatId, Long userId, String text, InlineKeyboardMarkup keyboard){
-        logger.info("Method sendMessage has been run: {}, {}, {}", chatId, text, keyboard);
+        logger.info("Method sendMenu 4parameters has been run: {}, {}, {}", chatId, text, keyboard);
 
         SendMessage request = new SendMessage(chatId, text)
                 .replyMarkup(keyboard)
@@ -176,7 +208,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
     }
 
     private void sendMenu(Long chatId,String text, InlineKeyboardMarkup keyboard){
-        logger.info("Method sendMessage has been run: {}, {}, {}", chatId, text, keyboard);
+        logger.info("Method sendMenu 3parameters has been run: {}, {}, {}", chatId, text, keyboard);
 
         SendMessage request = new SendMessage(chatId, text)
                 .replyMarkup(keyboard)

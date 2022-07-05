@@ -8,4 +8,6 @@ import sky.pro.pet_bot.model.Report;
  */
 
 public interface ReportRepository extends JpaRepository<Report,Long> {
+    boolean existsById(Report report);
+    long deleteReportById(Long id);
 }

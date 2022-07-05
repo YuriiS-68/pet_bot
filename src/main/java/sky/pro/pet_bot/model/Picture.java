@@ -1,30 +1,48 @@
 package sky.pro.pet_bot.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "pictures")
 public class Picture {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    private Long pictureId;
     private String filePath;
-    private long fileSize;
+    private Integer fileSize;
     private String mediaType;
 
-    @OneToOne
+    @ManyToOne()
+    @JoinColumn(name = "pet_id")
+    @JsonBackReference
     private Pet pet;
 
-    @OneToOne
-    private Answer answer;
+    @OneToMany(mappedBy = "picture")
+    @JsonManagedReference
+    private Collection<Report> reports;
+
+    public Picture() {
+    }
+
+    public Picture(Long pictureId, String filePath, Integer fileSize, String mediaType) {
+        this.pictureId = pictureId;
+        this.filePath = filePath;
+        this.fileSize = fileSize;
+        this.mediaType = mediaType;
+    }
 
     public Long getId() {
-        return id;
+        return pictureId;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.pictureId = id;
     }
 
     public String getFilePath() {
@@ -35,11 +53,11 @@ public class Picture {
         this.filePath = filePath;
     }
 
-    public long getFileSize() {
+    public Integer getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(long fileSize) {
+    public void setFileSize(Integer fileSize) {
         this.fileSize = fileSize;
     }
 
@@ -59,13 +77,36 @@ public class Picture {
         this.pet = pet;
     }
 
-    public Answer getAnswer() {
-        return answer;
+    public Collection<Report> getReports() {
+        return reports;
     }
 
-    public void setAnswer(Answer answer) {
-        this.answer = answer;
+    public void setReports(Collection<Report> reports) {
+        this.reports = reports;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Picture picture = (Picture) o;
+        return pictureId.equals(picture.pictureId) && getFilePath().equals(picture.getFilePath()) && getFileSize().equals(picture.getFileSize()) && getMediaType().equals(picture.getMediaType()) && Objects.equals(getPet(), picture.getPet()) && Objects.equals(getReports(), picture.getReports());
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(pictureId, getFilePath(), getFileSize(), getMediaType(), getPet(), getReports());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Picture.class.getSimpleName() + "[", "]")
+                .add("pictureId=" + pictureId)
+                .add("filePath='" + filePath + "'")
+                .add("fileSize=" + fileSize)
+                .add("mediaType='" + mediaType + "'")
+                .add("pet=" + pet)
+                .add("reports=" + reports)
+                .toString();
+    }
 }

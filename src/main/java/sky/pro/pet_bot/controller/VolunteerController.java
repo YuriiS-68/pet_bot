@@ -11,34 +11,39 @@ import java.util.Collection;
 @RequestMapping("/volunteers")
 public class VolunteerController {
 
-    private final VolunteerServiceInterfaceImpl volunteerServiceInterfaceImpl;
+    private final VolunteerServiceInterfaceImpl volunteerService;
 
-    public VolunteerController(VolunteerServiceInterfaceImpl volunteerServiceInterface) {
-        this.volunteerServiceInterfaceImpl = volunteerServiceInterface;
+    public VolunteerController(VolunteerServiceInterfaceImpl volunteerService) {
+        this.volunteerService = volunteerService;
     }
 
-    @GetMapping("/{id}")
-    public Collection<Volunteer> getVolunteerById(@PathVariable Long id){
-        return volunteerServiceInterfaceImpl.getVolunteerById(id);
+    @GetMapping("/get/{id}")
+    public ResponseEntity<Volunteer> getVolunteerById(@PathVariable Long id){
+        return ResponseEntity.ok(volunteerService.getVolunteerById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Volunteer> addVolunteer (@RequestBody Volunteer volunteer){
-        return ResponseEntity.ok(volunteerServiceInterfaceImpl.addVolunteer(volunteer));
+    @PostMapping("/add")
+    public ResponseEntity<Boolean> addVolunteer (@RequestBody Volunteer volunteer){
+        return ResponseEntity.ok(volunteerService.addVolunteer(volunteer.getName(), volunteer.getPhoneNumber()));
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<Volunteer> updateVolunteer (@RequestBody Volunteer volunteer){
-        return ResponseEntity.ok(volunteerServiceInterfaceImpl.update(volunteer));}
+        Volunteer findVolunteer = volunteerService.getVolunteerById(volunteer.getId());
+        if (findVolunteer == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(volunteerService.updateVolunteer(findVolunteer));
+    }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Volunteer> deleteVolunteer (@PathVariable Long id){
-        volunteerServiceInterfaceImpl.delete(id);
+        volunteerService.deleteVolunteer(id);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping("/getAll")
     public Collection<Volunteer> getAllVolunteers(){
-        return volunteerServiceInterfaceImpl.getAllVolunteers();
+        return volunteerService.getAllVolunteers();
     }
 }

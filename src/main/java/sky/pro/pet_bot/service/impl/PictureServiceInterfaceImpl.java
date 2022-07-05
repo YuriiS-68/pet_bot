@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sky.pro.pet_bot.dao.PictureRepository;
-import sky.pro.pet_bot.model.Answer;
 import sky.pro.pet_bot.model.Pet;
 import sky.pro.pet_bot.model.Picture;
+import sky.pro.pet_bot.model.Report;
 import sky.pro.pet_bot.service.PictureServiceInterface;
 
 import javax.transaction.Transactional;
@@ -24,12 +24,13 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
     private String picturesDir;
 
     private final PetServiceInterfaceImpl petServiceInterface;
-    private final AnswerServiceInterfaceImpl answerServiceInterface;
+    private final ReportServiceInterfaceImpl reportService;
     private final PictureRepository pictureRepository;
 
-    public PictureServiceInterfaceImpl(PetServiceInterfaceImpl petServiceInterface, AnswerServiceInterfaceImpl answerServiceInterface, PictureRepository pictureRepository) {
+    public PictureServiceInterfaceImpl(PetServiceInterfaceImpl petServiceInterface, ReportServiceInterfaceImpl reportService,
+                                       PictureRepository pictureRepository) {
         this.petServiceInterface = petServiceInterface;
-        this.answerServiceInterface = answerServiceInterface;
+        this.reportService = reportService;
         this.pictureRepository = pictureRepository;
     }
 
@@ -50,15 +51,15 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
         Picture picture = findPictureByPetId(petId);
         picture.setPet(pet);
         picture.setFilePath(filePatch.toString());
-        picture.setFileSize(picFile.getSize());
+        picture.setFileSize((int) picFile.getSize());
         picture.setMediaType(picFile.getContentType());
         pictureRepository.save(picture);
     }
 
-    public void uploadAnswerPic (Long answerId, MultipartFile picFile) throws IOException {
-        Answer answer = answerServiceInterface.getAnswerById(answerId);
+    public void uploadReportPic (Long reportId, MultipartFile picFile) throws IOException {
+        Report report = reportService.getReportById(reportId);
 
-        Path filePatch = Path.of(picturesDir, answer + "." + getExtensions (picFile.getOriginalFilename()));
+        Path filePatch = Path.of(picturesDir, report + "." + getExtensions (picFile.getOriginalFilename()));
         Files.createDirectories(filePatch.getParent());
         Files.deleteIfExists(filePatch);
         try (
@@ -69,12 +70,12 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
         ) {
             bis.transferTo(bos);
         }
-        Picture picture = findPictureByAnswerId(answerId);
-        picture.setAnswer(answer);
+        /*Picture picture = findPictureByReportId(reportId);
+        picture.setReport(report);
         picture.setFilePath(filePatch.toString());
-        picture.setFileSize(picFile.getSize());
+        picture.setFileSize((int) picFile.getSize());
         picture.setMediaType(picFile.getContentType());
-        pictureRepository.save(picture);
+        pictureRepository.save(picture);*/
     }
 
     private String getExtensions(String fileName) {
@@ -84,7 +85,7 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
         return pictureRepository.findByPetId(petId).orElse(new Picture());
     }
 
-    public Picture findPictureByAnswerId (Long answerId) {
-        return pictureRepository.findByAnswerId(answerId).orElse(new Picture());
+    public Picture findPictureByReportId (Long reportId) {
+        return pictureRepository.findByReportsId(reportId).orElse(new Picture());
     }
 }
