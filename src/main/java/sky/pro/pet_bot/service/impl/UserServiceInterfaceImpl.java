@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sky.pro.pet_bot.dao.UserRepository;
+import sky.pro.pet_bot.exception.AlreadyExistException;
 import sky.pro.pet_bot.model.User;
 import sky.pro.pet_bot.service.UserServiceInterface;
 
@@ -61,13 +62,29 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
     public User saveUser(Message message) {
         User user = new User();
         user.setChatId(message.chat().id());
-        user.setName(message.from().username());
         user.setMessageId(message.messageId());
+        user.setName(message.from().username());
         if (message.location() != null) {
             user.setLocation(message.location().toString());
         }
         userRepository.save(user);
         return user;
+    }
+
+    @Override
+    public User addUser(User user) {
+        if (userRepository.existsByChatId(user.getChatId())){
+            String errorMessage = "This user " + user.getName() + " already exist in DB";
+            logger.error(errorMessage);
+            throw new AlreadyExistException(errorMessage);
+        }
+        userRepository.save(user);
+        return user;
+    }
+
+    @Override
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 
     @Transactional

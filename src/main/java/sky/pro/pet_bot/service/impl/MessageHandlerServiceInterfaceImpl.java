@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import sky.pro.pet_bot.model.User;
 import sky.pro.pet_bot.model.Volunteer;
 import sky.pro.pet_bot.service.MessageHandlerServiceInterface;
+import sky.pro.pet_bot.service.PetServiceInterface;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +42,8 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
     private final TelegramBot telegramBot;
     private final UserServiceInterfaceImpl userServiceInterface;
     private final VolunteerServiceInterfaceImpl volunteerServiceInterface;
+
+    private final PetServiceInterface petService;
     private final CreateKeyboardMenuImpl createKeyboardMenu;
 
     private final Map<String, String> mapChooseMenu = Map.of(
@@ -68,10 +71,11 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
 
     public MessageHandlerServiceInterfaceImpl(TelegramBot telegramBot, UserServiceInterfaceImpl userServiceInterface,
                                               VolunteerServiceInterfaceImpl volunteerServiceInterface,
-                                              CreateKeyboardMenuImpl createKeyboardMenu) throws IOException {
+                                              PetServiceInterface petService, CreateKeyboardMenuImpl createKeyboardMenu) throws IOException {
         this.telegramBot = telegramBot;
         this.userServiceInterface = userServiceInterface;
         this.volunteerServiceInterface = volunteerServiceInterface;
+        this.petService = petService;
         this.createKeyboardMenu = createKeyboardMenu;
         this.messagesProperties = PropertiesLoaderUtils.loadProperties(new EncodedResource(new ClassPathResource("/messages.properties"),
                 StandardCharsets.UTF_8));
@@ -172,10 +176,13 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                         sendMenu(callbackChatId, callbackQuery.data(), createKeyboardMenu.petManageMenu());
                     }
 
-                    if (callbackQuery.data().equals("DAILY REPORT FORM")){
+                    if (callbackQuery.data().equals("DAILY REPORT FORM")  &&
+                            petService.isExistPetByUserId(currentUserCallback.getId())){
                         sendMessageReply(callbackChatId,
                                 messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
-                    }
+                    } /*else {
+                        sendMessage(callbackChatId, "WITHOUT_PET");
+                    }*/
                 }
             });
 

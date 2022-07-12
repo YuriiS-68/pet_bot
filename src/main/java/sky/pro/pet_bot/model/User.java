@@ -57,18 +57,11 @@ public class User {
     public User() {
     }
 
-    public User(Long id, Long chatId, Integer messageId, String phoneNumber, String name, String firstName, String lastName,
-                String email, String location, TypeShelters typeShelter) {
-        this.id = id;
+    public User(Long chatId, Integer messageId, String name, String location) {
         this.chatId = chatId;
         this.messageId = messageId;
-        this.phoneNumber = phoneNumber;
         this.name = name;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
         this.location = location;
-        this.typeShelter = typeShelter;
     }
 
     public TypeShelters getTypeShelter() {
