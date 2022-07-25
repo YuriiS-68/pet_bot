@@ -3,9 +3,9 @@ package sky.pro.pet_bot.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class NotFoundVolunteerException extends RuntimeException {
-    public NotFoundVolunteerException(String message){
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class AlreadyExistException extends RuntimeException{
+    public AlreadyExistException(String message){
         super();
     }
 }

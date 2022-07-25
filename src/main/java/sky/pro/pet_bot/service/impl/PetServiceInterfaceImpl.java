@@ -34,6 +34,13 @@ public class PetServiceInterfaceImpl implements PetServiceInterface {
         return petRepository.findById(id).get();
     }
 
+    public boolean isExistPetByUserId(Long userId){
+        logger.info("Run method isExistPetByUserId: {}", userId);
+        boolean isExistPet = petRepository.existsByUserId(userId);
+        logger.info("isExistPet result: {}", isExistPet);
+        return isExistPet;
+    }
+
     @Override
     public Collection<Pet> getAllPets() {
         logger.info("Method getAllPets is start");

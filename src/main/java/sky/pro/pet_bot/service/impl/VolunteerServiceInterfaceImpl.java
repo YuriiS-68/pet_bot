@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sky.pro.pet_bot.dao.VolunteerRepository;
+import sky.pro.pet_bot.exception.NotFoundVolunteerException;
 import sky.pro.pet_bot.model.Volunteer;
 import sky.pro.pet_bot.service.VolunteerServiceInterface;
 
@@ -43,5 +44,31 @@ public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface 
     @Override
     public void updateVolunteerStatus(Long volunteerId, Volunteer.VolunteersStatus status) {
         volunteerRepository.updateVolunteerStatus(volunteerId, status);
+    }
+
+    public Volunteer getVolunteerById(Long id){
+        return volunteerRepository.getVolunteerById(id);
+    }
+
+    public boolean addVolunteer (String name, String phoneNumber){
+        return volunteerRepository.existsVolunteerByNameAndPhoneNumber(name, phoneNumber);
+    }
+
+    public Volunteer updateVolunteer (Volunteer volunteer){
+        volunteerRepository.save(volunteer);
+        return volunteer;
+    }
+
+    public void deleteVolunteer(Long id){
+        long numOfVolunteerDelete = volunteerRepository.deleteVolunteerById(id);
+        if (numOfVolunteerDelete != 1){
+            String errorMessage = "No such id " + id + " found in the DB";
+            logger.error(errorMessage);
+            throw new NotFoundVolunteerException(errorMessage);
+        }
+    }
+
+    public Collection<Volunteer> getAllVolunteers(){
+        return volunteerRepository.findAll();
     }
 }

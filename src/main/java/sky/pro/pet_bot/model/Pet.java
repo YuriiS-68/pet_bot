@@ -1,8 +1,10 @@
 package sky.pro.pet_bot.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -31,6 +33,10 @@ public class Pet {
     @JoinColumn(name = "shelter_id")
     @JsonBackReference
     private Shelter shelter;
+
+    @OneToMany(mappedBy = "pet")
+    @JsonManagedReference
+    private Collection<Picture> pictures;
 
     public User getUser() {
         return user;
@@ -91,17 +97,25 @@ public class Pet {
         this.age = age;
     }
 
+    public Collection<Picture> getPictures() {
+        return pictures;
+    }
+
+    public void setPictures(Collection<Picture> pictures) {
+        this.pictures = pictures;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pet pet = (Pet) o;
-        return Objects.equals(id, pet.id) && Objects.equals(name, pet.name) && Objects.equals(type, pet.type) && Objects.equals(age, pet.age);
+        return getId().equals(pet.getId()) && getName().equals(pet.getName()) && getAge().equals(pet.getAge()) && getType() == pet.getType() && Objects.equals(getUser(), pet.getUser()) && Objects.equals(getShelter(), pet.getShelter()) && Objects.equals(getPictures(), pet.getPictures());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getAge(), getType());
+        return Objects.hash(getId(), getName(), getAge(), getType(), getUser(), getShelter(), getPictures());
     }
 
     @Override
@@ -111,6 +125,9 @@ public class Pet {
                 .add("name='" + name + "'")
                 .add("age=" + age)
                 .add("type=" + type)
+                .add("user=" + user.getName())
+                .add("shelter=" + shelter.getName())
+                .add("pictures=" + pictures)
                 .toString();
     }
 }

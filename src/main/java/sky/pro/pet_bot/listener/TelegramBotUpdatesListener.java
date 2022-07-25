@@ -4,9 +4,6 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.*;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,7 +40,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             Message message = update.message();
 
             messageHandlerService.handleMessage(message, update);
-
 
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -36,6 +37,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private User.TypeShelters typeShelter;
 
+    private LocalDate startTrialPeriod;
+    private LocalDate endTrialPeriod;
+
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private Collection<Pet> pets;
@@ -53,18 +57,11 @@ public class User {
     public User() {
     }
 
-    public User(Long id, Long chatId, Integer messageId, String phoneNumber, String name, String firstName, String lastName,
-                String email, String location, TypeShelters typeShelter) {
-        this.id = id;
+    public User(Long chatId, Integer messageId, String name, String location) {
         this.chatId = chatId;
         this.messageId = messageId;
-        this.phoneNumber = phoneNumber;
         this.name = name;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
         this.location = location;
-        this.typeShelter = typeShelter;
     }
 
     public TypeShelters getTypeShelter() {
@@ -171,6 +168,22 @@ public class User {
         this.volunteer = volunteer;
     }
 
+    public LocalDate getStartTrialPeriod() {
+        return startTrialPeriod;
+    }
+
+    public void setStartTrialPeriod(LocalDate startTrialPeriod) {
+        this.startTrialPeriod = startTrialPeriod;
+    }
+
+    public LocalDate getEndTrialPeriod() {
+        return endTrialPeriod;
+    }
+
+    public void setEndTrialPeriod(LocalDate endTrialPeriod) {
+        this.endTrialPeriod = endTrialPeriod;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -182,13 +195,15 @@ public class User {
                 && Objects.equals(getEmail(), user.getEmail()) && Objects.equals(getLocation(), user.getLocation())
                 && Objects.equals(getTypeShelter(), user.getTypeShelter())
                 && Objects.equals(getPets(), user.getPets()) && Objects.equals(getReports(), user.getReports())
-                && Objects.equals(getVolunteer(), user.getVolunteer());
+                && Objects.equals(getVolunteer(), user.getVolunteer()) && Objects.equals(getStartTrialPeriod(), user.getStartTrialPeriod())
+                && Objects.equals(getEndTrialPeriod(), user.getEndTrialPeriod());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getChatId(), getMessageId(), getPhoneNumber(), getName(), getFirstName(), getLastName(),
-                getEmail(), getLocation(), getTypeShelter(), getPets(), getReports(), getVolunteer());
+                getEmail(), getLocation(), getTypeShelter(), getPets(), getReports(), getVolunteer(), getStartTrialPeriod(),
+                getEndTrialPeriod());
     }
 
     @Override
@@ -204,6 +219,8 @@ public class User {
                 .add("email='" + email + "'")
                 .add("location='" + location + "'")
                 .add("typeShelter='" + typeShelter + "'")
+                .add("startTrialPeriod=" + startTrialPeriod)
+                .add("endTrialPeriod=" + endTrialPeriod)
                 .add("pets=" + pets)
                 .add("reports=" + reports)
                 .add("volunteer=" + volunteer.getName())

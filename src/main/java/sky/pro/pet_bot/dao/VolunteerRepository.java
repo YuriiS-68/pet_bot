@@ -9,6 +9,9 @@ import sky.pro.pet_bot.model.Volunteer;
 import java.util.Collection;
 
 public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
+    Volunteer getVolunteerById(Long id);
+    boolean existsVolunteerByNameAndPhoneNumber(String name, String phoneNumber);
+    long deleteVolunteerById(Long id);
     @Query(value = "select * from pet_bot.public.volunteers as v where v.status = :status limit 1", nativeQuery = true)
     Volunteer getVolunteerByStatus(@Param(value = "status") String status);
     @Query(value = "select v.id, v.name, v.phone_number, v.status from pet_bot.public.volunteers as v inner join users as u on " +

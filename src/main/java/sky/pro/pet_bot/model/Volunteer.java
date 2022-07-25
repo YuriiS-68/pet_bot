@@ -28,6 +28,9 @@ public class Volunteer {
     @JsonManagedReference
     private Collection<User> users;
 
+    @OneToMany(mappedBy = "volunteer")
+    private Collection<Report> reports;
+
     public Volunteer(Long id, String name, String phoneNumber, VolunteersStatus status) {
         this.id = id;
         this.name = name;
@@ -36,6 +39,7 @@ public class Volunteer {
     }
 
     public Volunteer() {
+
     }
 
     public Long getId() {
@@ -70,18 +74,36 @@ public class Volunteer {
         this.status = status;
     }
 
+    public Collection<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Collection<User> users) {
+        this.users = users;
+    }
+
+    public Collection<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(Collection<Report> reports) {
+        this.reports = reports;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Volunteer volunteer = (Volunteer) o;
-        return Objects.equals(id, volunteer.id) && Objects.equals(name, volunteer.name)
-                && Objects.equals(phoneNumber, volunteer.phoneNumber) && Objects.equals(status, volunteer.status);
+        return getId().equals(volunteer.getId()) && getName().equals(volunteer.getName())
+                && Objects.equals(getPhoneNumber(), volunteer.getPhoneNumber())
+                && getStatus() == volunteer.getStatus() && Objects.equals(getUsers(), volunteer.getUsers())
+                && Objects.equals(getReports(), volunteer.getReports());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, phoneNumber);
+        return Objects.hash(getId(), getName(), getPhoneNumber(), getStatus(), getUsers(), getReports());
     }
 
     @Override
@@ -90,8 +112,9 @@ public class Volunteer {
                 .add("id=" + id)
                 .add("name='" + name + "'")
                 .add("phoneNumber='" + phoneNumber + "'")
-                .add("status=" + status)
+                .add("status= '" + status + "'")
                 .add("users=" + users)
+                .add("reports=" + reports)
                 .toString();
     }
 }

@@ -13,6 +13,7 @@ import sky.pro.pet_bot.service.CreateKeyboardMenuInterface;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 @Service
 public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
@@ -26,7 +27,7 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
     }
 
     @Override
-    public InlineKeyboardMarkup startKeyboard() {
+    public InlineKeyboardMarkup startMenu() {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[][]{
                         new InlineKeyboardButton[]{
@@ -40,7 +41,26 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                 });
     }
 
-    public InlineKeyboardMarkup menuShelterKeyboard(String kindShelter) {
+    @Override
+    public InlineKeyboardMarkup chooseMenu(String kindPet) {
+        return new InlineKeyboardMarkup(
+                new InlineKeyboardButton[][]{
+                        new InlineKeyboardButton[]{
+                                getButtonMenuInfoByKindPet(kindPet)
+                        },
+                        new InlineKeyboardButton[]{
+                                getButtonByKindPet(kindPet)
+                        },
+                        new InlineKeyboardButton[]{
+                                getButtonMenuReportByKindPet(kindPet)
+                        },
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer")).callbackData("CALL VOLUNTEER")
+                        }
+                });
+    }
+
+    public InlineKeyboardMarkup shelterMenu(String kindShelter) {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[][]{
                         new InlineKeyboardButton[]{
@@ -64,6 +84,128 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                                         .callbackData("CALL VOLUNTEER")
                         }
                 });
+    }
+
+    public InlineKeyboardMarkup getPetMenu(String kindShelter){
+        logger.info("MenuGetPet was started: {}", kindShelter);
+            return new InlineKeyboardMarkup(
+                    formatButtons(createKeyboardButtonMenuTakePet(kindShelter)));
+    }
+
+    public InlineKeyboardMarkup petManageMenu(){
+        return new InlineKeyboardMarkup(
+                new InlineKeyboardButton[][]{
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_form_report_pet"))
+                                        .callbackData("DAILY REPORT FORM")
+                        },
+                        new InlineKeyboardButton[]{
+
+                        },
+                        new InlineKeyboardButton[]{
+
+                        },
+                        new InlineKeyboardButton[]{
+
+                        },
+                        new InlineKeyboardButton[]{
+
+                        },
+                        new InlineKeyboardButton[]{
+
+                        },
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer"))
+                                        .callbackData("CALL VOLUNTEER")
+                        }
+                });
+    }
+
+    private InlineKeyboardButton[][] createKeyboardButtonMenuTakePet(String kindShelter){
+         return new InlineKeyboardButton[][]{
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_rules_meeting"))
+                                 .callbackData("RULES MEETING")
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_list_document"))
+                                 .callbackData("LIST DOCUMENT")
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_list_transporting"))
+                                 .callbackData("LIST TRANSPORTING")
+                 },
+                 new InlineKeyboardButton[]{
+                         getButtonListSettingUpLittlePet(kindShelter)
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_list_setting_pet"))
+                                 .callbackData("LIST SETTING UP PET")
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_list_setting_pet_disability"))
+                                 .callbackData("LIST SETTING UP PET DISABILITY")
+                 },
+                 new InlineKeyboardButton[]{
+                         getButtonTipsDogBreeder(kindShelter)
+                 },
+                 new InlineKeyboardButton[]{
+                         getButtonTrustedCynologists(kindShelter)
+                 },
+                 new InlineKeyboardButton[]{
+                         getButtonReasonsRejection(kindShelter)
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_accept_data"))
+                                 .callbackData("LEAVE YOUR CONTACT DETAILS")
+                 },
+                 new InlineKeyboardButton[]{
+                         new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer"))
+                                 .callbackData("CALL VOLUNTEER")
+                 }
+         };
+    }
+
+    private InlineKeyboardButton[][] formatButtons(InlineKeyboardButton[][] inputArrays){
+        return Stream.of(inputArrays).filter(inlineKeyboardButtons -> inlineKeyboardButtons[0] != null)
+                .toArray(value -> new InlineKeyboardButton[value][0]);
+    }
+
+    private InlineKeyboardButton getButtonListSettingUpLittlePet(String kindShelter){
+        logger.info("Button LIST SETTING UP LITTLE PET was created");
+        if (kindShelter.equals("HOW TAKE DOG")) {
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_list_setting_puppy"))
+                    .callbackData("LIST SETTING UP PUPPY");
+        }
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_list_setting_kitty"))
+                .callbackData("LIST SETTING UP KITTY");
+    }
+
+    private InlineKeyboardButton getButtonTipsDogBreeder(String kindShelter){
+        logger.info("Button TIPS DOG BREEDER was created");
+        if (kindShelter.equals("HOW TAKE DOG")) {
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_tips_dog_breeder"))
+                    .callbackData("TIPS DOG BREEDER");
+        }
+        return null;
+    }
+
+    private InlineKeyboardButton getButtonTrustedCynologists(String kindShelter){
+        logger.info("Button TRUSTED CYNOLOGISTS was created");
+        if (kindShelter.equals("HOW TAKE DOG")) {
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_trusted_cynologists"))
+                    .callbackData("TRUSTED CYNOLOGISTS");
+        }
+        return null;
+    }
+
+    private InlineKeyboardButton getButtonReasonsRejection(String kindShelter){
+        logger.info("Button REASONS REJECTION was created");
+        if (kindShelter.equals("HOW TAKE DOG")) {
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_reasons_rejection"))
+                    .callbackData("REASONS REJECTION");
+        }
+        return null;
     }
 
     private InlineKeyboardButton getButtonSafetyAdviceByKindPet(String kindShelter){
@@ -108,30 +250,11 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                 .callbackData("SHELTER CAT OPENING HOURS");
     }
 
-    @Override
-    public InlineKeyboardMarkup createChooseMenu(String kindPet) {
-        return new InlineKeyboardMarkup(
-                new InlineKeyboardButton[][]{
-                        new InlineKeyboardButton[]{
-                                getButtonMenuInfoByKindPet(kindPet)
-                        },
-                        new InlineKeyboardButton[]{
-                                getButtonByKindPet(kindPet)
-                        },
-                        new InlineKeyboardButton[]{
-                                getButtonMenuReportByKindPet(kindPet)
-                        },
-                        new InlineKeyboardButton[]{
-                                new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer")).callbackData("CALL VOLUNTEER")
-                        }
-                });
-    }
-
     private InlineKeyboardButton getButtonByKindPet(String kindPet){
         if (kindPet.equals("DOG SHELTER")){
-            return new InlineKeyboardButton(messagesProperties.getProperty("button_take_dog")).callbackData("DOG");
+            return new InlineKeyboardButton(messagesProperties.getProperty("button_take_dog")).callbackData("HOW TAKE DOG");
         }
-        return new InlineKeyboardButton(messagesProperties.getProperty("button_take_cat")).callbackData("CAT");
+        return new InlineKeyboardButton(messagesProperties.getProperty("button_take_cat")).callbackData("HOW TAKE CAT");
     }
 
     private InlineKeyboardButton getButtonMenuInfoByKindPet(String kindPet){

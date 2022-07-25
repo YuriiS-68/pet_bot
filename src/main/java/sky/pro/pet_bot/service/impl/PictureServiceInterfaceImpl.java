@@ -4,10 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sky.pro.pet_bot.dao.PictureRepository;
-import sky.pro.pet_bot.model.Answer;
 import sky.pro.pet_bot.model.Pet;
 import sky.pro.pet_bot.model.Picture;
+import sky.pro.pet_bot.service.PetServiceInterface;
 import sky.pro.pet_bot.service.PictureServiceInterface;
+import sky.pro.pet_bot.service.ReportServiceInterface;
 
 import javax.transaction.Transactional;
 import java.io.*;
@@ -23,18 +24,19 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
     @Value("${path.to.pictures.folder}")
     private String picturesDir;
 
-    private final PetServiceInterfaceImpl petServiceInterface;
-    private final AnswerServiceInterfaceImpl answerServiceInterface;
+    private final PetServiceInterface petService;
+    private final ReportServiceInterface reportService;
     private final PictureRepository pictureRepository;
 
-    public PictureServiceInterfaceImpl(PetServiceInterfaceImpl petServiceInterface, AnswerServiceInterfaceImpl answerServiceInterface, PictureRepository pictureRepository) {
-        this.petServiceInterface = petServiceInterface;
-        this.answerServiceInterface = answerServiceInterface;
+    public PictureServiceInterfaceImpl(PetServiceInterface petService, ReportServiceInterface reportService,
+                                       PictureRepository pictureRepository) {
+        this.petService = petService;
+        this.reportService = reportService;
         this.pictureRepository = pictureRepository;
     }
 
-    public void uploadPetPic (Long petId, MultipartFile picFile) throws IOException {
-        Pet pet = petServiceInterface.getPetById(petId);
+    public void uploadPetPicture (Long petId, MultipartFile picFile) throws IOException {
+        Pet pet = petService.getPetById(petId);
 
         Path filePatch = Path.of(picturesDir, pet + "." + getExtensions (picFile.getOriginalFilename()));
         Files.createDirectories(filePatch.getParent());
@@ -50,29 +52,7 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
         Picture picture = findPictureByPetId(petId);
         picture.setPet(pet);
         picture.setFilePath(filePatch.toString());
-        picture.setFileSize(picFile.getSize());
-        picture.setMediaType(picFile.getContentType());
-        pictureRepository.save(picture);
-    }
-
-    public void uploadAnswerPic (Long answerId, MultipartFile picFile) throws IOException {
-        Answer answer = answerServiceInterface.getAnswerById(answerId);
-
-        Path filePatch = Path.of(picturesDir, answer + "." + getExtensions (picFile.getOriginalFilename()));
-        Files.createDirectories(filePatch.getParent());
-        Files.deleteIfExists(filePatch);
-        try (
-                InputStream is = picFile.getInputStream();
-                OutputStream os = Files.newOutputStream(filePatch, CREATE_NEW);
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
-        ) {
-            bis.transferTo(bos);
-        }
-        Picture picture = findPictureByAnswerId(answerId);
-        picture.setAnswer(answer);
-        picture.setFilePath(filePatch.toString());
-        picture.setFileSize(picFile.getSize());
+        picture.setFileSize((int) picFile.getSize());
         picture.setMediaType(picFile.getContentType());
         pictureRepository.save(picture);
     }
@@ -84,7 +64,7 @@ public class PictureServiceInterfaceImpl implements PictureServiceInterface {
         return pictureRepository.findByPetId(petId).orElse(new Picture());
     }
 
-    public Picture findPictureByAnswerId (Long answerId) {
-        return pictureRepository.findByAnswerId(answerId).orElse(new Picture());
+    public Picture findPictureByReportId (Long reportId) {
+        return pictureRepository.findByReportsId(reportId).orElse(new Picture());
     }
 }

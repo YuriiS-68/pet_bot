@@ -16,7 +16,9 @@ CREATE TABLE users (
     last_name VARCHAR(200),
     phone_number VARCHAR(30),
     email VARCHAR(200),
-    location TEXT
+    location TEXT,
+    start_trial_period TIMESTAMP,
+    end_trial_period TIMESTAMP
 );
 
 -- changeSet yuvis:3
@@ -47,12 +49,27 @@ CREATE TABLE volunteers (
 );
 
 -- changeSet yuvis:6
-ALTER TABLE users ADD COLUMN type_shelter VARCHAR(50) DEFAULT NULL
-                    CONSTRAINT type_shelter_check CHECK ( type_shelter IN ('DOG_SHELTER', 'CAT_SHELTER'));
-
--- changeSet yuvis:7
 ALTER TABLE users ADD COLUMN message_id INTEGER;
 
--- changeSet yuvis:8
+-- changeSet yuvis:7
 ALTER TABLE volunteers ADD COLUMN status VARCHAR(50) DEFAULT 'FREE'
                     CONSTRAINT status_check CHECK ( status IN ('FREE', 'BUSY'));
+
+-- changeSet yuvis:8
+CREATE TABLE reports (
+    id SERIAL NOT NULL PRIMARY KEY,
+    report_text TEXT NULL,
+    time_sending_report TIMESTAMP NULL,
+    is_viewed BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- changeSet yuvis:9
+CREATE TABLE pictures (
+    id SERIAL NOT NULL PRIMARY KEY,
+    file_path TEXT NULL,
+    file_size INTEGER NULL,
+    media_type VARCHAR(255)
+);
+
+-- changeSet yuvis:10
+DROP TABLE answer;
