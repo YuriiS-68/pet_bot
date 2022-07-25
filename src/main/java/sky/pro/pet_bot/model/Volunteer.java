@@ -1,7 +1,5 @@
 package sky.pro.pet_bot.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -18,6 +16,7 @@ public class Volunteer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer chatId;
     private String name;
     private String phoneNumber;
 
@@ -25,18 +24,7 @@ public class Volunteer {
     private VolunteersStatus status;
 
     @OneToMany(mappedBy = "volunteer")
-    @JsonManagedReference
     private Collection<User> users;
-
-    @OneToMany(mappedBy = "volunteer")
-    private Collection<Report> reports;
-
-    public Volunteer(Long id, String name, String phoneNumber, VolunteersStatus status) {
-        this.id = id;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.status = status;
-    }
 
     public Volunteer() {
 
@@ -48,6 +36,14 @@ public class Volunteer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Integer chatId) {
+        this.chatId = chatId;
     }
 
     public String getName() {
@@ -82,39 +78,30 @@ public class Volunteer {
         this.users = users;
     }
 
-    public Collection<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(Collection<Report> reports) {
-        this.reports = reports;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Volunteer volunteer = (Volunteer) o;
-        return getId().equals(volunteer.getId()) && getName().equals(volunteer.getName())
-                && Objects.equals(getPhoneNumber(), volunteer.getPhoneNumber())
-                && getStatus() == volunteer.getStatus() && Objects.equals(getUsers(), volunteer.getUsers())
-                && Objects.equals(getReports(), volunteer.getReports());
+        return getId().equals(volunteer.getId()) && getChatId().equals(volunteer.getChatId())
+                && getName().equals(volunteer.getName()) && Objects.equals(getPhoneNumber(), volunteer.getPhoneNumber())
+                && getStatus() == volunteer.getStatus() && Objects.equals(getUsers(), volunteer.getUsers());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getPhoneNumber(), getStatus(), getUsers(), getReports());
+        return Objects.hash(getId(), getChatId(), getName(), getPhoneNumber(), getStatus(), getUsers());
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", Volunteer.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
+                .add("chatId=" + chatId)
                 .add("name='" + name + "'")
                 .add("phoneNumber='" + phoneNumber + "'")
                 .add("status= '" + status + "'")
                 .add("users=" + users)
-                .add("reports=" + reports)
                 .toString();
     }
 }
