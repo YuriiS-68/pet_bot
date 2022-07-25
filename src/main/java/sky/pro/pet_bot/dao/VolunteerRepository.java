@@ -12,14 +12,14 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     Volunteer getVolunteerById(Long id);
     boolean existsVolunteerByNameAndPhoneNumber(String name, String phoneNumber);
     long deleteVolunteerById(Long id);
-    @Query(value = "select * from pet_bot.public.volunteers as v where v.status = :status limit 1", nativeQuery = true)
+    @Query(value = "select * from volunteers v where v.status = :status limit 1", nativeQuery = true)
     Volunteer getVolunteerByStatus(@Param(value = "status") String status);
-    @Query(value = "select v.id, v.name, v.phone_number, v.status from pet_bot.public.volunteers as v inner join users as u on " +
-            "u.volunteer_id = v.id where u.id = :userId and v.status = :status", nativeQuery = true)
+    @Query(value = "select v.* from volunteers v inner join users u on u.volunteer_id = v.id where u.id = :userId and v.status = :status", nativeQuery = true)
     Volunteer getVolunteerByStatusAndUserId(@Param(value = "userId") Long userId, @Param(value = "status") String status);
-    @Query(value = "select v.id, v.name, v.phone_number, v.status from pet_bot.public.volunteers as v inner join users as u on " +
-            "u.volunteer_id = v.id where u.id = :userId and v.status = :status", nativeQuery = true)
-    Collection<Volunteer> findVolunteersByUserId(@Param(value = "userId") Long userId, @Param(value = "status") String status);
+    @Query(value = "select v.* from volunteers v inner join users u on u.volunteer_id = v.id where u.id = :userId", nativeQuery = true)
+    Collection<Volunteer> getVolunteersByUserId(@Param(value = "userId") Long userId);
+    @Query(value = "select v.* from volunteers v inner join users u on u.volunteer_id = v.id where u.id = :userId and v.status = :status", nativeQuery = true)
+    Collection<Volunteer> getVolunteersByStatusAndUserId(@Param(value = "userId") Long userId, @Param(value = "status") String status);
     @Modifying
     @Query("update Volunteer v set v.status = :status where v.id = :id")
     void updateVolunteerStatus(@Param(value = "id") Long id, @Param(value = "status") Volunteer.VolunteersStatus status);

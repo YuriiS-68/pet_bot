@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sky.pro.pet_bot.model.User;
 import sky.pro.pet_bot.service.UserServiceInterface;
 
-import java.net.URI;
 import java.util.Collection;
 
 @RestController
@@ -46,7 +46,7 @@ public class UserController {
             summary = "Добавление нового пользователя",
             description = "Позволяет добавить пользователя в базу данных"
     )
-    @PostMapping("/add")
+    @PostMapping(value = "/add", consumes = "application/json;charset=UTF-8", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> addUser(@RequestBody User user){
         User addUser = userService.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(addUser);
@@ -63,12 +63,12 @@ public class UserController {
             }
     )
     @PutMapping("/update")
-    public ResponseEntity<User> updateUser(@RequestBody User user){
-        User foundUser = userService.getUserById(user.getId());
-        if (foundUser == null){
+    public ResponseEntity<User> editeUser(@RequestBody User user){
+        User updatedUser = userService.editUser(user);
+        if (updatedUser == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(foundUser);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @Operation(

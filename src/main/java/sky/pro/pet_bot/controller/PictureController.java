@@ -36,7 +36,7 @@ public class PictureController {
     )
     @GetMapping(value = "/{id}/picture-from-file")
     public void downloadPicture(@PathVariable Long id, HttpServletResponse response) throws IOException {
-        Picture picture = pictureService.findPictureByReportId(id);
+        Picture picture = pictureService.findPictureById(id);
         Path path = Path.of(picture.getFilePath());
         try (InputStream is = Files.newInputStream(path);
              OutputStream os = response.getOutputStream();) {

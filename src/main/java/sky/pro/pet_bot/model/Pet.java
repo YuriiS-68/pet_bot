@@ -1,10 +1,6 @@
 package sky.pro.pet_bot.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -26,17 +22,11 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "shelter_id")
-    @JsonBackReference
     private Shelter shelter;
-
-    @OneToMany(mappedBy = "pet")
-    @JsonManagedReference
-    private Collection<Picture> pictures;
 
     public User getUser() {
         return user;
@@ -52,13 +42,6 @@ public class Pet {
 
     public void setShelter(Shelter shelter) {
         this.shelter = shelter;
-    }
-
-    public Pet(Long id, String name, KindPet type, Integer age) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.age = age;
     }
 
     public Pet() {
@@ -97,25 +80,19 @@ public class Pet {
         this.age = age;
     }
 
-    public Collection<Picture> getPictures() {
-        return pictures;
-    }
-
-    public void setPictures(Collection<Picture> pictures) {
-        this.pictures = pictures;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pet pet = (Pet) o;
-        return getId().equals(pet.getId()) && getName().equals(pet.getName()) && getAge().equals(pet.getAge()) && getType() == pet.getType() && Objects.equals(getUser(), pet.getUser()) && Objects.equals(getShelter(), pet.getShelter()) && Objects.equals(getPictures(), pet.getPictures());
+        return getId().equals(pet.getId()) && getName().equals(pet.getName()) && getAge().equals(pet.getAge())
+                && getType() == pet.getType() && Objects.equals(getUser(), pet.getUser())
+                && Objects.equals(getShelter(), pet.getShelter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getAge(), getType(), getUser(), getShelter(), getPictures());
+        return Objects.hash(getId(), getName(), getAge(), getType(), getUser(), getShelter());
     }
 
     @Override
@@ -127,7 +104,6 @@ public class Pet {
                 .add("type=" + type)
                 .add("user=" + user.getName())
                 .add("shelter=" + shelter.getName())
-                .add("pictures=" + pictures)
                 .toString();
     }
 }

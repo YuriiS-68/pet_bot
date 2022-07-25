@@ -1,17 +1,17 @@
 package sky.pro.pet_bot.service.impl;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.ForceReply;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.Keyboard;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.DeleteMessage;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
@@ -20,18 +20,18 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Service;
+import sky.pro.pet_bot.model.Picture;
+import sky.pro.pet_bot.model.Report;
 import sky.pro.pet_bot.model.User;
 import sky.pro.pet_bot.model.Volunteer;
-import sky.pro.pet_bot.service.MessageHandlerServiceInterface;
-import sky.pro.pet_bot.service.PetServiceInterface;
+import sky.pro.pet_bot.service.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.IllegalFormatException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -40,8 +40,11 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
 
     private final Properties messagesProperties;
     private final TelegramBot telegramBot;
-    private final UserServiceInterfaceImpl userServiceInterface;
-    private final VolunteerServiceInterfaceImpl volunteerServiceInterface;
+    private final UserServiceInterface userService;
+    private final VolunteerServiceInterface volunteerService;
+    private final PictureServiceInterface pictureService;
+
+    private final ReportServiceInterface reportService;
 
     private final PetServiceInterface petService;
     private final CreateKeyboardMenuImpl createKeyboardMenu;
@@ -69,12 +72,14 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
             "TRUSTED CYNOLOGISTS", "TRUSTED_CYNOLOGISTS"
     );
 
-    public MessageHandlerServiceInterfaceImpl(TelegramBot telegramBot, UserServiceInterfaceImpl userServiceInterface,
-                                              VolunteerServiceInterfaceImpl volunteerServiceInterface,
-                                              PetServiceInterface petService, CreateKeyboardMenuImpl createKeyboardMenu) throws IOException {
+    public MessageHandlerServiceInterfaceImpl(TelegramBot telegramBot, UserServiceInterface userService,
+                                              VolunteerServiceInterface volunteerService,
+                                              PictureServiceInterface pictureService, ReportServiceInterface reportService, PetServiceInterface petService, CreateKeyboardMenuImpl createKeyboardMenu) throws IOException {
         this.telegramBot = telegramBot;
-        this.userServiceInterface = userServiceInterface;
-        this.volunteerServiceInterface = volunteerServiceInterface;
+        this.userService = userService;
+        this.volunteerService = volunteerService;
+        this.pictureService = pictureService;
+        this.reportService = reportService;
         this.petService = petService;
         this.createKeyboardMenu = createKeyboardMenu;
         this.messagesProperties = PropertiesLoaderUtils.loadProperties(new EncodedResource(new ClassPathResource("/messages.properties"),
@@ -83,14 +88,15 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
 
     @Override
     public void handleMessage(Message message, Update update) {
-        if (update.message() != null && update.message().text().equals(messagesProperties.getProperty("START_CMD"))){
+        if (update.message() != null && update.message().text() != null
+                && update.message().text().equals(messagesProperties.getProperty("START_CMD"))){
             Long chatId = message.chat().id();
-            User currentUser = userServiceInterface.getUserByChatId(chatId);
+            User currentUser = userService.findUserByChatId(chatId);
 
-            if (!userServiceInterface.existChatId(chatId)){
+            if (!userService.existChatId(chatId)){
                 sendMenu(chatId, messagesProperties.getProperty("GREETINGS_MESSAGE"), createKeyboardMenu.startMenu());
                 try{
-                    userServiceInterface.saveUser(message);
+                    userService.saveUser(message);
                 }catch (IllegalFormatException | DateTimeParseException e){
                     logger.error("Saving to DB failed:", e);
                 }
@@ -105,11 +111,11 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                 CallbackQuery callbackQuery = callbackUpdate.callbackQuery();
                 if (callbackQuery != null){
                     Long callbackChatId = callbackQuery.message().chat().id();
-                    User currentUserCallback = userServiceInterface.getUserByChatId(callbackChatId);
+                    User currentUserCallback = userService.findUserByChatId(callbackChatId);
 
                     if (callbackQuery.data().equals("DOG SHELTER") || callbackQuery.data().equals("CAT SHELTER")){
-                        userServiceInterface.setTypeShelterUserAndUpdate(currentUserCallback, callbackQuery.data());
-                        userServiceInterface.updateUserTypeShelter(currentUserCallback);
+                        userService.setTypeShelterUserAndUpdate(currentUserCallback, callbackQuery.data());
+                        userService.updateUserTypeShelter(currentUserCallback);
                         logger.info("DOG SHELTER callbackQuery.id() = {}", callbackQuery.id());
                         logger.info("Block callbackQuery messageId = {}", currentUserCallback.getMessageId());
 
@@ -136,27 +142,27 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                     }
 
                     if (callbackQuery.data().equals("CALL VOLUNTEER")){
-                        Volunteer freeVolunteer = volunteerServiceInterface.getFreeVolunteerByStatusAndUserId(
+                        Volunteer freeVolunteer = volunteerService.getFreeVolunteerByStatusAndUserId(
                                 currentUserCallback.getId(), Volunteer.VolunteersStatus.valueOf("FREE"));
                         logger.info("CurrentUserCallback id: {}", currentUserCallback.getId());
                         logger.info("Found free volunteer by status and id: {}", freeVolunteer);
 
                         if (freeVolunteer != null){
                             sendMessage(callbackChatId, callVolunteer(freeVolunteer));
-                            volunteerServiceInterface.updateVolunteerStatus(freeVolunteer.getId(), Volunteer.VolunteersStatus.valueOf("BUSY"));
+                            volunteerService.updateVolunteerStatus(freeVolunteer.getId(), Volunteer.VolunteersStatus.valueOf("BUSY"));
                             logger.info("Worked the condition freeVolunteer != null: {}", freeVolunteer);
 
-                        } else if (volunteerServiceInterface.findFreeVolunteers(currentUserCallback.getId(), Volunteer.VolunteersStatus.valueOf("FREE")).isEmpty()
-                                || !volunteerServiceInterface.findFreeVolunteers(currentUserCallback.getId(), Volunteer.VolunteersStatus.valueOf("BUSY")).isEmpty()){
+                        } else if (volunteerService.findFreeVolunteers(currentUserCallback.getId(), Volunteer.VolunteersStatus.valueOf("FREE")).isEmpty()
+                                || !volunteerService.findFreeVolunteers(currentUserCallback.getId(), Volunteer.VolunteersStatus.valueOf("BUSY")).isEmpty()){
 
-                            Volunteer volunteer = volunteerServiceInterface.getFreeVolunteerByStatus("FREE");
+                            Volunteer volunteer = volunteerService.getFreeVolunteerByStatus("FREE");
                             if (volunteer == null){
                                 sendMessage(callbackChatId, messagesProperties.getProperty("VOLUNTEERS_IS_BUSY"));
                             } else {
                                 logger.info("Worked the condition volunteer == null: {}", volunteer);
                                 sendMessage(callbackChatId, callVolunteer(volunteer));
-                                userServiceInterface.updateUserVolunteerId(currentUserCallback.getId(), volunteer.getId());
-                                volunteerServiceInterface.updateVolunteerStatus(volunteer.getId(), Volunteer.VolunteersStatus.valueOf("BUSY"));
+                                userService.updateUserVolunteerId(currentUserCallback.getId(), volunteer.getId());
+                                volunteerService.updateVolunteerStatus(volunteer.getId(), Volunteer.VolunteersStatus.valueOf("BUSY"));
                             }
                         }
                     }
@@ -173,23 +179,90 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                     }
 
                     if (callbackQuery.data().equals("DOG REPORTS") || callbackQuery.data().equals("CAT REPORTS")){
-                        sendMenu(callbackChatId, callbackQuery.data(), createKeyboardMenu.petManageMenu());
+                        if(petService.isExistPetByUserId(currentUserCallback.getId())) {
+                            sendMenu(callbackChatId, callbackQuery.data(), createKeyboardMenu.petManageMenu());
+                        } else {
+                            sendMessage(callbackChatId, messagesProperties.getProperty("WITHOUT_PET"));
+                        }
                     }
 
-                    if (callbackQuery.data().equals("DAILY REPORT FORM")  &&
-                            petService.isExistPetByUserId(currentUserCallback.getId())){
-                        sendMessageReply(callbackChatId,
-                                messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
-                    } /*else {
-                        sendMessage(callbackChatId, "WITHOUT_PET");
-                    }*/
+                    if (callbackQuery.data().equals("DAILY REPORT FORM")){
+                        if (userService.checkTypePetOfUser(currentUserCallback)) {
+                            sendMessageReply(callbackChatId,
+                                    messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
+                        } else {
+                            sendMessage(callbackChatId, messagesProperties.getProperty("NOT_HAVE_NEEDED_TYPE_SHELTER"));
+                        }
+                    }
                 }
             });
 
-            if (update.message() != null && update.message().text() != null){
-                User userForUpdate = userServiceInterface.getContactsDataUser(update.message().chat().id(), update.message().text());
-                userServiceInterface.updateUser(userForUpdate);
+            if (update.message() != null && update.message().text() != null && update.message().replyToMessage() != null
+                    && update.message().replyToMessage().text().equals(messagesProperties.getProperty("REQUEST_DATA_USER"))){
+                User userForUpdate = userService.getContactsDataUser(update.message().chat().id(), update.message().text());
+                userService.updateUser(userForUpdate);
                 sendMessage(update.message().chat().id(), messagesProperties.getProperty("SAVED_CONTACTS"));
+            }
+
+            if ((update.message() != null && update.message().text() != null || update.message() != null && update.message().photo() != null)
+                    && update.message().replyToMessage() != null
+                    && update.message().replyToMessage().text().equals(messagesProperties.getProperty("DAILY_REPORT_FORM"))){
+
+                User currentUser = userService.findUserByChatId(update.message().chat().id());
+                LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+                Report lastReport = reportService.getLastReportByUserId(currentUser.getId());
+
+                if (reportService.isExistReportByUserId(currentUser.getId())
+                        && lastReport.getTimeSendingReport().truncatedTo(ChronoUnit.DAYS).equals(currentTime)) {
+                    if (lastReport.getReportText() == null || lastReport.getReportText().isEmpty()) {
+                        String description = update.message().text();
+                        lastReport.setReportText(description);
+                        reportService.updateReport(lastReport.getId(), description);
+                    }
+
+                    if (update.message().photo() != null){
+                        try {
+                            pictureService.downloadFile(update.message());
+                            pictureService.addPicture(update.message(), currentUser);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else if (lastReport == null || lastReport.getTimeSendingReport().truncatedTo(ChronoUnit.DAYS).isBefore(currentTime)){
+                    Report report = reportService.saveReport(currentUser);
+                    report.setReportText(update.message().text());
+                    reportService.updateReport(report.getId(), update.message().text());
+
+                    if (update.message().photo() != null){
+                        try {
+                            pictureService.downloadFile(update.message());
+                            pictureService.addPicture(update.message(), currentUser);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+                Long lastReportId = reportService.getIdLastReportIdByUserId(currentUser.getId());
+                String description = reportService.getValueLastReportTextColumn(lastReportId);
+                Picture picture = pictureService.findPictureByReportId(lastReportId);
+
+
+                if (description != null && picture == null){
+                    sendMessage(currentUser.getChatId(), messagesProperties.getProperty("IF_NOT_PICTURE"));
+                    sendMessageReply(currentUser.getChatId(),
+                            messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
+                }
+
+                if ((description == null || description.isEmpty()) && picture != null){
+                    sendMessage(currentUser.getChatId(), messagesProperties.getProperty("IF_NOT_DESCRIPTION"));
+                    sendMessageReply(currentUser.getChatId(),
+                            messagesProperties.getProperty("DAILY_REPORT_FORM"), new ForceReply());
+                }
+
+                if (description != null && picture != null) {
+                    sendMessage(message.chat().id(), messagesProperties.getProperty("REPORT_ACCEPTED"));
+                }
             }
         }
     }
@@ -211,7 +284,7 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true);
 
-        sendResponse(request, sendResponse -> userServiceInterface.updateUserMessageId(userId, sendResponse.message().messageId()));
+        sendResponse(request, sendResponse -> userService.updateUserMessageId(userId, sendResponse.message().messageId()));
     }
 
     private void sendMenu(Long chatId,String text, InlineKeyboardMarkup keyboard){
@@ -260,6 +333,16 @@ public class MessageHandlerServiceInterfaceImpl implements MessageHandlerService
     private void sendResponse(SendMessage request, Consumer<SendResponse> callback){
         SendResponse sendResponse = sendResponse(request);
         callback.accept(sendResponse);
+    }
+
+    private File getPicture(Message message){
+        List<PhotoSize> photos = List.of(message.photo());
+        PhotoSize photo = photos.stream()
+                .max(Comparator.comparing(PhotoSize::fileSize)).orElse(null);
+        assert photo != null;
+        GetFile request = new GetFile(photo.fileId());
+        GetFileResponse response = telegramBot.execute(request);
+        return response.file();
     }
 
     private String callVolunteer(Volunteer volunteer){

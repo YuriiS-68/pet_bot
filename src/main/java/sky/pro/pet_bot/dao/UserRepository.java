@@ -6,17 +6,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sky.pro.pet_bot.model.User;
-import sky.pro.pet_bot.model.Volunteer;
 
 import java.util.Collection;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User getUserById(Long id);
+
+    User getUserByChatId(Long chatId);
+
     boolean existsByChatId(Long chatId);
-    User findUserByChatId(Long chatId);
-    @Query(value = "select type_shelter from pet_bot.public.users where id = :id", nativeQuery = true)
-    String getTypeShelter(Long id);
+
+    @Query(value = "select u.* from users u inner join pets p on u.id = p.user_id", nativeQuery = true)
+    Collection<User> getUsersWithPet();
+
     @Modifying
     @Query("update User u set u.lastName = :lastName, u.firstName = :firstName, u.email = :email, u.phoneNumber = :phoneNumber where u.id = :id")
     void updateUser(@Param(value = "id") Long id, @Param(value = "lastName") String lastName,
