@@ -8,7 +8,6 @@ import sky.pro.pet_bot.model.Pet;
 import sky.pro.pet_bot.service.PetServiceInterface;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class PetServiceInterfaceImpl implements PetServiceInterface {
@@ -39,6 +38,13 @@ public class PetServiceInterfaceImpl implements PetServiceInterface {
         boolean isExistPet = petRepository.existsByUserId(userId);
         logger.info("isExistPet result: {}", isExistPet);
         return isExistPet;
+    }
+
+
+
+    @Override
+    public Collection<Pet> getPetsByUserId (Long userId){
+        return petRepository.getPetsByUserId(userId);
     }
 
     @Override
