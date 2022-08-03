@@ -100,21 +100,6 @@ public class CreateKeyboardMenuImpl implements CreateKeyboardMenuInterface {
                                         .callbackData("DAILY REPORT FORM")
                         },
                         new InlineKeyboardButton[]{
-
-                        },
-                        new InlineKeyboardButton[]{
-
-                        },
-                        new InlineKeyboardButton[]{
-
-                        },
-                        new InlineKeyboardButton[]{
-
-                        },
-                        new InlineKeyboardButton[]{
-
-                        },
-                        new InlineKeyboardButton[]{
                                 new InlineKeyboardButton(messagesProperties.getProperty("button_call_volunteer"))
                                         .callbackData("CALL VOLUNTEER")
                         }

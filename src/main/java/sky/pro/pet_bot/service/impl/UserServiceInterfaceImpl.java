@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sky.pro.pet_bot.dao.UserRepository;
 import sky.pro.pet_bot.exception.AlreadyExistException;
+import sky.pro.pet_bot.model.Pet;
 import sky.pro.pet_bot.model.User;
+import sky.pro.pet_bot.service.PetServiceInterface;
 import sky.pro.pet_bot.service.UserServiceInterface;
 
 import java.util.Collection;
@@ -20,8 +22,16 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
     private final Logger logger = LoggerFactory.getLogger(UserServiceInterfaceImpl.class);
     private final UserRepository userRepository;
 
-    public UserServiceInterfaceImpl(UserRepository userRepository) {
+    private final PetServiceInterface petService;
+
+    public UserServiceInterfaceImpl(UserRepository userRepository, PetServiceInterface petService) {
         this.userRepository = userRepository;
+        this.petService = petService;
+    }
+
+    @Override
+    public User findUserByChatId(Long chatId) {
+        return userRepository.getUserByChatId(chatId);
     }
 
     @Override
@@ -41,7 +51,7 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
     public User getContactsDataUser(Long chatId, String input){
         logger.info("Run method getContactsDataUser {}, {}:", chatId, input);
 
-        User user = userRepository.findUserByChatId(chatId);
+        User user = userRepository.getUserByChatId(chatId);
         Pattern pattern = Pattern.compile("([a-zA-ZА-Яа-я]+) ([a-zA-ZА-Яа-я]+)\\n(\\w+@\\w+\\.\\w+)" +
                 "\\n((\\d{1,3}?|\\+\\d\\s?|\\+?|\\+\\d{3}\\s?|\\(?|-?)?\\d{2}(\\(?\\d{2}\\)?[\\- ]?)?[\\d\\- ]{7,10})");
         Matcher matcher = pattern.matcher(input);
@@ -94,25 +104,44 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
                 user.getPhoneNumber());
     }
 
+    @Override
+    public User editUser(User user) {
+        if (existChatId(user.getChatId())) {
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
     @Transactional
     @Override
     public void updateUserTypeShelter(User user) {
         userRepository.updateUser(user.getId(), user.getTypeShelter());
     }
-
     @Transactional
     @Override
     public void updateUserMessageId(Long userId, Integer messageId){
         userRepository.updateUserMessageId(userId, messageId);
     }
+
     @Transactional
     @Override
     public void updateUserVolunteerId(Long userId, Long volunteerId){
         userRepository.updateUserVolunteerId(userId, volunteerId);
     }
 
-    public String getTypeShelterFromDB(Long id){
-        return userRepository.getTypeShelter(id);
+    public boolean checkTypePetOfUser(User user){
+        Collection<Pet> pets = petService.getPetsByUserId(user.getId());
+
+        if (pets.isEmpty()){
+            return false;
+        }
+
+        for (Pet pet : pets) {
+            if (user.getTypeShelter().toString().contains(pet.getType().toString())){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -120,8 +149,8 @@ public class UserServiceInterfaceImpl implements UserServiceInterface {
         return userRepository.getUserById(id);
     }
 
-    public User getUserByChatId(Long chatId){
-        return userRepository.findUserByChatId(chatId);
+    public Collection<User> getUsersWithPet(){
+        return userRepository.getUsersWithPet();
     }
 
     @Override

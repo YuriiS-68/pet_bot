@@ -1,48 +1,35 @@
 package sky.pro.pet_bot.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 @Entity
 @Table(name = "pictures")
 public class Picture {
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long pictureId;
+    @Column(name = "report_id")
+    private Long id;
     private String filePath;
     private Integer fileSize;
     private String mediaType;
-
-    @ManyToOne()
-    @JoinColumn(name = "pet_id")
-    @JsonBackReference
-    private Pet pet;
-
-    @OneToMany(mappedBy = "picture")
-    @JsonManagedReference
-    private Collection<Report> reports;
+    @Lob
+    private byte[] preview;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "report_id")
+    private Report report;
 
     public Picture() {
     }
 
-    public Picture(Long pictureId, String filePath, Integer fileSize, String mediaType) {
-        this.pictureId = pictureId;
-        this.filePath = filePath;
-        this.fileSize = fileSize;
-        this.mediaType = mediaType;
-    }
-
     public Long getId() {
-        return pictureId;
+        return id;
     }
 
     public void setId(Long id) {
-        this.pictureId = id;
+        this.id = id;
     }
 
     public String getFilePath() {
@@ -69,20 +56,28 @@ public class Picture {
         this.mediaType = mediaType;
     }
 
-    public Pet getPet() {
-        return pet;
+    public byte[] getPreview() {
+        return preview;
     }
 
-    public void setPet(Pet pet) {
-        this.pet = pet;
+    public void setPreview(byte[] preview) {
+        this.preview = preview;
     }
 
-    public Collection<Report> getReports() {
-        return reports;
+    public Report getReport() {
+        return report;
     }
 
-    public void setReports(Collection<Report> reports) {
-        this.reports = reports;
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public Report getReports() {
+        return report;
+    }
+
+    public void setReports(Report report) {
+        this.report = report;
     }
 
     @Override
@@ -90,23 +85,23 @@ public class Picture {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Picture picture = (Picture) o;
-        return pictureId.equals(picture.pictureId) && getFilePath().equals(picture.getFilePath()) && getFileSize().equals(picture.getFileSize()) && getMediaType().equals(picture.getMediaType()) && Objects.equals(getPet(), picture.getPet()) && Objects.equals(getReports(), picture.getReports());
+        return id.equals(picture.id) && getFilePath().equals(picture.getFilePath()) && getFileSize().equals(picture.getFileSize())
+                && getMediaType().equals(picture.getMediaType()) && Objects.equals(getReports(), picture.getReports());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pictureId, getFilePath(), getFileSize(), getMediaType(), getPet(), getReports());
+        return Objects.hash(id, getFilePath(), getFileSize(), getMediaType(), getReports());
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", Picture.class.getSimpleName() + "[", "]")
-                .add("pictureId=" + pictureId)
+                .add("pictureId=" + id)
                 .add("filePath='" + filePath + "'")
                 .add("fileSize=" + fileSize)
                 .add("mediaType='" + mediaType + "'")
-                .add("pet=" + pet)
-                .add("reports=" + reports)
+                .add("report=" + report)
                 .toString();
     }
 }

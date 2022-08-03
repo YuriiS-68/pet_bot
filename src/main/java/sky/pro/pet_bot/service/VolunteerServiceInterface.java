@@ -1,5 +1,6 @@
 package sky.pro.pet_bot.service;
 
+import org.springframework.data.repository.query.Param;
 import sky.pro.pet_bot.model.Volunteer;
 
 import java.util.Collection;
@@ -20,6 +21,8 @@ public interface VolunteerServiceInterface {
     void updateVolunteerStatus(Long volunteerId, Volunteer.VolunteersStatus status);
 
     Collection<Volunteer> findFreeVolunteers(Long idUser, Volunteer.VolunteersStatus status);
+
+    Collection<Volunteer> findVolunteersByUserId(Long userId);
 
     Collection<Volunteer> getAllVolunteers();
 }

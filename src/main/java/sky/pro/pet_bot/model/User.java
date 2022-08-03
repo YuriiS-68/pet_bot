@@ -1,7 +1,6 @@
 package sky.pro.pet_bot.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -33,35 +32,23 @@ public class User {
     private String lastName;
     private String email;
     private String location;
-
     @Enumerated(EnumType.STRING)
     private User.TypeShelters typeShelter;
-
     private LocalDate startTrialPeriod;
     private LocalDate endTrialPeriod;
-
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+    @JsonIgnore
     private Collection<Pet> pets;
-
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+    @JsonIgnore
     private Collection<Report> reports;
-
     @ManyToOne
     @JoinColumn(name = "volunteer_id")
-    @JsonBackReference
+    @JsonIgnore
     private Volunteer volunteer;
 
 
     public User() {
-    }
-
-    public User(Long chatId, Integer messageId, String name, String location) {
-        this.chatId = chatId;
-        this.messageId = messageId;
-        this.name = name;
-        this.location = location;
     }
 
     public TypeShelters getTypeShelter() {
@@ -208,7 +195,7 @@ public class User {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+        StringJoiner stringJoiner = new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("chatId=" + chatId)
                 .add("messageId=" + messageId)
@@ -220,10 +207,11 @@ public class User {
                 .add("location='" + location + "'")
                 .add("typeShelter='" + typeShelter + "'")
                 .add("startTrialPeriod=" + startTrialPeriod)
-                .add("endTrialPeriod=" + endTrialPeriod)
-                .add("pets=" + pets)
-                .add("reports=" + reports)
-                .add("volunteer=" + volunteer.getName())
-                .toString();
+                .add("endTrialPeriod=" + endTrialPeriod);
+
+        if (volunteer != null){
+            stringJoiner.add("volunteer=" + volunteer.getName());
+        }
+        return stringJoiner.toString();
     }
 }
