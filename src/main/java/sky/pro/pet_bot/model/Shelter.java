@@ -1,7 +1,5 @@
 package sky.pro.pet_bot.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -25,18 +23,9 @@ public class Shelter {
     private KindShelter type;
 
     @OneToMany(mappedBy = "shelter")
-    @JsonManagedReference
     private Collection<Pet> pets;
 
     public Shelter() {
-    }
-
-    public Shelter(Long id, String name, String address, String accessRules, KindShelter type) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.accessRules = accessRules;
-        this.type = type;
     }
 
     public Long getId() {

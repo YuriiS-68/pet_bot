@@ -1,6 +1,7 @@
 package sky.pro.pet_bot.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     private String reportText;
     private LocalDateTime timeSendingReport;
@@ -20,21 +22,11 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
     private User user;
-    @ManyToOne
-    @JoinColumn(name = "volunteer_id")
-    @JsonBackReference
-    private Volunteer volunteer;
-    @ManyToOne
-    @JoinColumn(name = "picture_id")
-    @JsonBackReference
-    private Picture picture;
 
-    public Report(Long id, String reportText) {
-        this.id = id;
-        this.reportText = reportText;
-    }
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private Picture picture;
 
     public Report() {
     }
@@ -80,14 +72,6 @@ public class Report {
         this.user = user;
     }
 
-    public Volunteer getVolunteer() {
-        return volunteer;
-    }
-
-    public void setVolunteer(Volunteer volunteer) {
-        this.volunteer = volunteer;
-    }
-
     public Picture getPicture() {
         return picture;
     }
@@ -104,26 +88,26 @@ public class Report {
         return isViewed() == report.isViewed() && getId().equals(report.getId())
                 && Objects.equals(getReportText(), report.getReportText())
                 && Objects.equals(getTimeSendingReport(), report.getTimeSendingReport())
-                && getUser().equals(report.getUser()) && getVolunteer().equals(report.getVolunteer())
-                && getPicture().equals(report.getPicture());
+                && getUser().equals(report.getUser()) && getPicture().equals(report.getPicture());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getReportText(), getTimeSendingReport(), isViewed(), getUser(), getVolunteer(),
-                getPicture());
+        return Objects.hash(getId(), getReportText(), getTimeSendingReport(), isViewed(), getUser(), getPicture());
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Report.class.getSimpleName() + "[", "]")
+        StringJoiner stringJoiner = new StringJoiner(", ", Report.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("reportText='" + reportText + "'")
                 .add("timeSendingReport=" + timeSendingReport)
                 .add("isViewed=" + isViewed)
-                .add("user=" + user.getName())
-                .add("volunteer=" + volunteer.getName())
-                .add("picture=" + picture.getId())
-                .toString();
+                .add("user=" + user);
+
+        if (picture != null){
+            stringJoiner.add("picture=" + picture.getId());
+        }
+        return stringJoiner.toString();
     }
 }

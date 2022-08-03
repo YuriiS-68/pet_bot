@@ -22,7 +22,7 @@ public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface 
 
     public Collection<Volunteer> findFreeVolunteers(Long idUser, Volunteer.VolunteersStatus status){
         logger.info("Run method findFreeVolunteers: {} {}", idUser, status);
-        Collection<Volunteer> volunteers = volunteerRepository.findVolunteersByUserId(idUser, status.toString());
+        Collection<Volunteer> volunteers = volunteerRepository.getVolunteersByStatusAndUserId(idUser, status.toString());
         logger.info("Collection volunteers: {}", volunteers);
         return volunteers;
     }
@@ -66,6 +66,10 @@ public class VolunteerServiceInterfaceImpl implements VolunteerServiceInterface 
             logger.error(errorMessage);
             throw new NotFoundVolunteerException(errorMessage);
         }
+    }
+
+    public Collection<Volunteer> findVolunteersByUserId(Long userId){
+        return volunteerRepository.getVolunteersByUserId(userId);
     }
 
     public Collection<Volunteer> getAllVolunteers(){
